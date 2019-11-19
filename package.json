@@ -1,0 +1,28 @@
+{
+  "name": "M7011E-DynamicWebSystems",
+  "version": "1.0.0",
+  "description": "Project in the course M7011E",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "npx nodemon simulator/app.js -w simulator"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kevintrf/M7011E-DynamicWebSystems.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kevintrf/M7011E-DynamicWebSystems/issues"
+  },
+  "homepage": "https://github.com/Kevintrf/M7011E-DynamicWebSystems#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mysql": "^2.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  }
+}
