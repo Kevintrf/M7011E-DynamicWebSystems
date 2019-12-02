@@ -81,28 +81,48 @@ function sendToDatabase(sql){
     });
 }
 
+function getFromDatabase(sql, callback){
+    var output;
+    con.query(sql, function (err, result){
+        if (err) throw err;
+        output = result;
+        callback(output);
+    });
+    return output;
+}
 
 //Runs function updateServer every second until stopFunction() is called
 let serverTick = setInterval(function(){ updateServer() }, 1000);
 
 function updateServer() {
-    testFunction();
+    //testFunction();
     //createUser("user2", "pass");
-    var prosumerCount;
-
-    var sql = "SELECT COUNT(*) FROM prosumers;"
-    con.query(sql, function (err, result){
-        if (err) throw err;
-        prosumerCount = result;
-    });
-
-    for (var i = 1; i < prosumerCount+1; i++){
-        prosumerProduction(i);
-    }
+    var prosumerCount = getFromDatabase("SELECT count(*) as total FROM prosumers", function(data){
+        for (var i = 1; i < data[0].total+1; i++){
+            prosumerProduction(i);
+        }
+    }); 
+    
 }
 
 function prosumerProduction(id){
-
+    var production = currentWindSpeed() * 0.8;
+    var consumption = prosumerConsumption();
+    getFromDatabase("SELECT battery, batteryCapacity FROM prosumers WHERE id=" + id + ";", function(data){
+        var currentBattery = data[0].battery;
+        var batteryCapacity =  data[0].batteryCapacity;
+        
+        if (production-consumption > 0){
+            if (production-consumption+currentBattery > batteryCapacity)
+                sendToDatabase("UPDATE prosumers SET battery =" + batteryCapacity +  " WHERE id=" + id + ";");
+            else
+                sendToDatabase("UPDATE prosumers SET battery =" + (production-consumption+currentBattery) +  " WHERE id=" + id + ";");
+        }
+    
+        else{
+            //sno batteri från marknaden
+        }
+    });
 }
 
 function stopServer() {
