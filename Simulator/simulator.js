@@ -1,12 +1,5 @@
-var http = require('http');
 var mysql = require('mysql');
 var createDist = require('distributions-normal');
-
-http.createServer(function (req, res) {
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.write(testWeather());
-    res.end("Goodbye world!");
-}).listen(8080);
 
 var con = mysql.createConnection({
     host: "localhost",
@@ -21,13 +14,17 @@ con.connect(function(err) {
     con.query("USE node;")
 });
 
-function createUser(username, password){
-    console.log("hej");
-    var sql = "INSERT INTO users (username, password) VALUES ('" + username + "', '" + password + "');";
-    sendToDatabase(sql);
+//Runs function updateServer every second until stopFunction() is called
+setInterval(function(){ updateServer() }, 1000);
+
+function updateServer() {
+    sendToDatabase("SELECT count(*) as value FROM prosumers;", function(data){
+        prosumerProduction(data[0].value);
+    }); 
+    
 }
 
-function prosumerConsumption(){
+function currrentConsumption(){
     //Returns hourly usage of 
     var normal = createDist();
 
@@ -35,7 +32,7 @@ function prosumerConsumption(){
     normal.variance(3);
 
     //Divided by 24 to get hourly usage
-    var output = (normal.inv([Math.random()])/24).toFixed(3);
+    var output = (normal.inv([Math.random()])/24);
     return output;
 }
 
@@ -49,93 +46,89 @@ function currentWindSpeed(){
     normal.variance(5);
 
     //Ändra i random så att det är mer sannolikt att få ett väldigt lågt värde? Vanligt att det blir vindstilla men inte att det typ blir storm
-    var output = parseFloat(normal.inv([Math.random()])).toFixed(3);
+    var output = parseFloat(normal.inv([Math.random()]));
     return output;
-}
-
-/*
-function prosumerConsumption(){
-    //Returns hourly consumption (Between 2.5 and 3.5kWh) 3kWh is an hourly average of the real life statistical average of 25000kWh per year
-    var powerConsumption = ((Math.floor(Math.random() * (350 - 250 + 1)) + 250)*0.01).toFixed(2);
-    return powerConsumption;
-}
-*/
-
-function consumePower(){
-    //if consumption < production
-        //shit
-    //else take from battery if possible
-
-    //else
-        //buyFromMarket();
 }
 
 function buyFromMarket(energy, user){
 
 }
 
-function sendToDatabase(sql){
-    con.query(sql, function (err, result){
-        if (err) throw err;
-        console.log("Query successfully sent to database");
-    });
-}
-
-function getFromDatabase(sql, callback){
+function sendToDatabase(sql, callback){
     var output;
     con.query(sql, function (err, result){
         if (err) throw err;
-        output = result;
-        callback(output);
+        callback(result);
     });
-    return output;
 }
 
-//Runs function updateServer every second until stopFunction() is called
-let serverTick = setInterval(function(){ updateServer() }, 1000);
 
-function updateServer() {
-    //testFunction();
-    //createUser("user2", "pass");
-    var prosumerCount = getFromDatabase("SELECT count(*) as total FROM prosumers", function(data){
-        for (var i = 1; i < data[0].total+1; i++){
-            prosumerProduction(i);
-        }
-    }); 
-    
+
+function sendToMarket(id, amount){
+
 }
 
-function prosumerProduction(id){
-    var production = currentWindSpeed() * 0.8;
-    var consumption = prosumerConsumption();
-    getFromDatabase("SELECT battery, batteryCapacity FROM prosumers WHERE id=" + id + ";", function(data){
+function getFromMarket(id, amount){
+    return 0;
+}
+
+function getFromBattery(id, amount){
+    return 0;
+}
+
+function sendToBattery(id, amount){
+    sendToDatabase("SELECT battery, batteryCapacity FROM prosumers WHERE id=" + id + ";", function(data){
+        console.log(id);
         var currentBattery = data[0].battery;
         var batteryCapacity =  data[0].batteryCapacity;
         
-        if (production-consumption > 0){
-            if (production-consumption+currentBattery > batteryCapacity)
-                sendToDatabase("UPDATE prosumers SET battery =" + batteryCapacity +  " WHERE id=" + id + ";");
-            else
-                sendToDatabase("UPDATE prosumers SET battery =" + (production-consumption+currentBattery) +  " WHERE id=" + id + ";");
-        }
+        //Automatically sell excess power?
+        if (amount+currentBattery > batteryCapacity)
+            sendToDatabase("UPDATE prosumers SET battery =" + batteryCapacity +  " WHERE id=" + id + ";", function(data){});
+        else
+            sendToDatabase("UPDATE prosumers SET battery =" + (amount+currentBattery) + " WHERE id=" + id + ";", function(data){});
     
-        else{
-            //sno batteri från marknaden
-        }
     });
 }
 
-function stopServer() {
-    clearInterval(serverTick);
+function currentMarketPrice(){
+    return 5;
 }
 
-function testFunction(){
-    console.log("Hourly power usage: " + prosumerConsumption() + "kWh");
-    console.log("Wind speed this hour: " + currentWindSpeed() + " knots");
-    console.log("--------------");
+function prosumerProduction(prosumerCount){
+    var power = 0;
+    for (let i = 1; i < prosumerCount+1; i++){
+        //In the future also add a check for if the prosumer actually has a wind turbine, boolean isProducer
+        //Also check the decimal of the power column in the database, might need to support more/less numbers in the future
+        power = parseFloat((currentWindSpeed() * 0.2) - currrentConsumption());
+
+        sendToDatabase("UPDATE prosumers SET power =" + power + " WHERE id=" + i + ";", function(data){});
+        console.log("Updated power of user " + i + " to " + power);
+        if (power > 0){
+            sendToDatabase("SELECT shareToMarket as value FROM prosumers WHERE id=" + i + ";", function(data){
+                console.log(i);
+                var percentageToMarket = data[0].value*0.01;
+                sendToMarket(i, power*percentageToMarket);
+                sendToBattery(i , power*(1-percentageToMarket));
+            });
+        }
+
+        //This should be changed to it automatically can purchase more from the market if needed
+        //the getFromMarket/Battery returns the value that you bought, if it is not enough something should be done
+        //this is a design choice that needs to be addressed
+        else if (power < 0){
+            sendToDatabase("SELECT marketSharePurchase as value FROM prosumers WHERE id=" + i + ";", function(data){
+                var percentageFromMarket = data[0].value*0.01;
+                getFromMarket(i, power*percentageFromMarket);
+                getFromBattery(i , power*(1-percentageFromMarket));
+            });
+        }
+
+        if (power < 0)
+            blackout(i);
+    }
 }
 
-function testWeather(){
-    var weather = "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/22.177971/lat/65.589498/data.json";
-    return weather;
+function blackout(id){
+
 }
