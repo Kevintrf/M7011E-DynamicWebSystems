@@ -3,25 +3,27 @@ var createDist = require('distributions-normal');
 
 var con = mysql.createConnection({
     host: "localhost",
-    user: "node",
-    password: "node"
+    user: "piedpiper",
+    password: "piedpiper"
 });
 
 con.connect(function(err) {
     if (err)
         throw err;
     console.log("Connected successfully");
-    con.query("USE node;")
+    con.query("USE node;");
 });
 
 //Runs function updateServer every second until stopFunction() is called
 setInterval(function(){ updateServer() }, 1000);
 
 function updateServer() {
+    //Clear the market every update (i think?), so "TRUNCATE TABLE market;"
+
+    //getFromMarket(1, 5);
     sendToDatabase("SELECT count(*) as value FROM prosumers;", function(data){
         prosumerProduction(data[0].value);
-    }); 
-    
+    });
 }
 
 function currrentConsumption(){
@@ -50,10 +52,6 @@ function currentWindSpeed(){
     return output;
 }
 
-function buyFromMarket(energy, user){
-
-}
-
 function sendToDatabase(sql, callback){
     var output;
     con.query(sql, function (err, result){
@@ -62,18 +60,61 @@ function sendToDatabase(sql, callback){
     });
 }
 
-
-
 function sendToMarket(id, amount){
-
+    //Add to check if id already exists, the same id should never be able to send something twice (since the table is emptied every cycle), what to do if it does?
+    sendToDatabase("INSERT INTO market VALUES(" + id + ", " + amount + ");", function(data){});
 }
 
 function getFromMarket(id, amount){
-    return 0;
+    sendToDatabase("SELECT power FROM market WHERE power!=0;", function(data){
+        let availablePower = data[0].power;
+        if (availablePower >= amount){
+            let excess = availablePower-amount;
+            sendToDatabase("UPDATE market SET power =" + excess + " WHERE id=" + data[0].id + ";", function(data){
+                sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(data){
+                    let newPower = data[0].power + amount;
+                    sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(data){});
+                });
+            });
+        }
+
+        else{
+            sendToDatabase("DELETE FROM prosumers WHERE id=" + data[0].id + ";", function(data){
+                sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(data){
+                    let newPower = data[0].power + availablePower;
+                    sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(data){
+                        getFromMarket(id, amount-availablePower);
+                    });
+                });
+            });
+        }
+    });
 }
 
 function getFromBattery(id, amount){
-    return 0;
+    sendToDatabase("SELECT battery FROM prosumers WHERE id="+ id + ";", function(data){
+        let availablePower = data[0].battery;
+        if (availablePower >= amount){
+            let newBattery = availablePower-amount;
+            sendToDatabase("UPDATE prosumers SET battery=" + newBattery + " WHERE id=" + id + ";", function(data){
+                sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(data){
+                    let newPower = data[0].power + amount;
+                    sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(data){});
+                });
+            });
+        }
+
+        else{
+            sendToDatabase("UPDATE prosumers SET battery=0 WHERE id=" + id + ";", function data(){
+                sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(data){
+                    let newPower = data[0].power + availablePower;
+                    sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(data){
+                        //Return that we didnt get enough power from the battery
+                    });
+                });
+            });
+        }
+    });
 }
 
 function sendToBattery(id, amount){
@@ -92,7 +133,9 @@ function sendToBattery(id, amount){
 }
 
 function currentMarketPrice(){
-    return 5;
+    //getTotalConsumption does not exist yet
+    let marketPrice = getTotalConsumption()/currentWindSpeed();
+    return marketPrice;
 }
 
 function prosumerProduction(prosumerCount){
