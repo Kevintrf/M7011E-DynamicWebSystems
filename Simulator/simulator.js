@@ -18,10 +18,31 @@ con.connect(function(err) {
 setInterval(function(){ updateServer() }, 1000);
 
 function updateServer() {
-    sendToMarket(2, 500);
-    //sendToDatabase("SELECT count(*) as value FROM prosumers;", function(data){
-    //    prosumerProduction(data[0].value);
-    //});
+    powerCycle();
+    sendToDatabase("SELECT count(*) as value FROM prosumers;", function(data){
+        powerCycle(data[0].value);
+    });
+}
+
+//Make these synchronous, every loop should also be synchronous, each loop should be done before the next loop starts
+function powerCycle(userAmount){
+    resetPowerAllProsumers();
+
+    for (let i=1; i<userAmount+1; i++){
+        generatePower(i);
+    }
+
+    for (let i=1; i<userAmount+1; i++){
+        handleExcessPower(i);
+    }
+
+    for (let i=1; i<userAmount+1; i++){
+        handleMissingPower(i);
+    }
+
+    for (let i=1; i<userAmount+1; i++){
+        checkBlackout(i);
+    }
 }
 
 function currrentConsumption(){
@@ -50,8 +71,14 @@ function currentWindSpeed(){
     return output;
 }
 
+//Behöver förbättras
+function currentMarketPrice(){
+    //getTotalConsumption does not exist yet
+    let marketPrice = getTotalConsumption()/currentWindSpeed();
+    return marketPrice;
+}
+
 function sendToDatabase(sql, callback){
-    var output;
     con.query(sql, function (err, result){
         if (err) throw err;
         callback(result);
@@ -154,46 +181,106 @@ function sendToBattery(id, amount){
     });
 }
 
-function currentMarketPrice(){
-    //getTotalConsumption does not exist yet
-    let marketPrice = getTotalConsumption()/currentWindSpeed();
-    return marketPrice;
+//funkar
+function resetPowerAllProsumers(){
+    sendToDatabase("UPDATE prosumers SET power=0, blackout=0;", function(){
+        console.log("Power and blackout states of all prosumers have been reset")
+    });
 }
 
-//Tror loopen skapar/kan skapa problem, lös på ett bättre sätt. Nestla allt i en stor eller fixa promises/async
-function prosumerProduction(prosumerCount){
-    var power = 0;
-    for (let i = 1; i < 2; i++){//i < prosumerCount+1; i++){
-        //In the future also add a check for if the prosumer actually has a wind turbine, boolean isProducer
-        //Also check the decimal of the power column in the database, might need to support more/less numbers in the future
-        power = parseFloat((currentWindSpeed() * 0.2) - currrentConsumption());
+//Funkar
+function generatePower(id){
+    let power = parseFloat((currentWindSpeed() * 0.2) - currrentConsumption());
 
-        sendToDatabase("UPDATE prosumers SET power =" + power + " WHERE id=" + i + ";", function(data){});
-        console.log("Updated power of user " + i + " to " + power);
+    sendToDatabase("UPDATE prosumers SET power =" + power + " WHERE id=" + id + ";", function(){
+        console.log("Updated power of user " + id + " to " + power);
+    });
+}
+
+function handleExcessPower(id){
+    sendToDatabase("SELECT power, shareToMarket FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+        let power = prosumerData[0].power;
+
         if (power > 0){
-            sendToDatabase("SELECT shareToMarket as value FROM prosumers WHERE id=" + i + ";", function(data){
-                var percentageToMarket = data[0].value*0.01;
-                sendToMarket(i, power*percentageToMarket);
-                sendToBattery(i, power*(1-percentageToMarket));
-            });
+            let percentageToMarket = prosumerData[0].shareToMarket*0.01;
+            sendToMarket(id, power*percentageToMarket);
+            sendToBattery(id, power*(1-percentageToMarket));
         }
-
-        //This should be changed to it automatically can purchase more from the market if needed
-        //the getFromMarket/Battery returns the value that you bought, if it is not enough something should be done
-        //this is a design choice that needs to be addressed
-        else if (power < 0){
-            sendToDatabase("SELECT marketSharePurchase as value FROM prosumers WHERE id=" + i + ";", function(data){
-                var percentageFromMarket = data[0].value*0.01;
-                getFromMarket(i, power*percentageFromMarket);
-                getFromBattery(i , power*(1-percentageFromMarket));
-            });
-        }
-
-        //if (power < 0)
-            //blackout(i);
-    }
+    });
 }
 
-function blackout(id){
+function handleMissingPower(id){
+    sendToDatabase("SELECT power, marketSharePurchase FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+        let power = prosumerData[0].power;
 
+        if (power < 0){
+            let percentageFromMarket = prosumerData[0].marketSharePurchase*0.01;
+            getFromMarket(id, power*percentageFromMarket);
+            getFromBattery(id, power*(1-percentageFromMarket));
+            
+            
+            //Some asyncronous waiting fix, this code should only be run after the market and battery queries are completed
+            //Tries to get all the power from market/battery, to avoid blackout, only happens if market/battery did not have enough
+            //Maybe should only be run if some setting in user interface allows it?
+            /*
+            sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+                let power = prosumerData[0].power;
+                getFromBattery(id, power);
+                //async and wait
+                sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+                    let power = prosumerData[0].power;
+                    getFromMarket(id, power);
+                });
+            });*/
+        }
+    });
+}
+
+//funkar som den ska
+//Blackout value (bit) in sql needs to be accessed as "SELECT blackout+0 FROM prosumers;", 
+//the +0 converts it to an integer otherwise it prints a literal bit (which will break stuff)
+function checkBlackout(id){
+    sendToDatabase("SELECT power FROM prosumers where id=" + id +";", function(prosumerData){
+        let power = prosumerData[0].power;
+        if (power < 0){
+            sendToDatabase("UPDATE prosumers SET blackout=1 WHERE id=" + id + ";", function(){
+                console.log("User " + id + " has experienced a blackout");
+            });
+        }
+    });
+}
+
+//---OBSELETE, ersatt av handleExcessPower och handleMissingPower------
+//funkar,
+function powerManagement(id){
+    sendToDatabase("SELECT power, shareToMarket, marketSharePurchase FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+        let power = prosumerData[0].power;
+
+        if (power > 0){
+            let percentageToMarket = prosumerData[0].shareToMarket*0.01;
+            sendToMarket(id, power*percentageToMarket);
+            sendToBattery(id, power*(1-percentageToMarket));
+        }
+
+        else if (power < 0){
+            let percentageFromMarket = prosumerData[0].marketSharePurchase*0.01;
+            getFromMarket(id, power*percentageFromMarket);
+            getFromBattery(id, power*(1-percentageFromMarket));
+            
+            
+            //Some asyncronous waiting fix, this code should only be run after the market and battery queries are completed
+            //Tries to get all the power from market/battery, to avoid blackout, only happens if market/battery did not have enough
+            //Maybe should only be run if some setting in user interface allows it?
+            /*
+            sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+                let power = prosumerData[0].power;
+                getFromBattery(id, power);
+                //async and wait
+                sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+                    let power = prosumerData[0].power;
+                    getFromMarket(id, power);
+                });
+            });*/
+        }
+    });
 }
