@@ -18,12 +18,10 @@ con.connect(function(err) {
 setInterval(function(){ updateServer() }, 1000);
 
 function updateServer() {
-    //Clear the market every update (i think?), so "TRUNCATE TABLE market;"
-
-    //getFromMarket(1, 5);
-    sendToDatabase("SELECT count(*) as value FROM prosumers;", function(data){
-        prosumerProduction(data[0].value);
-    });
+    sendToMarket(2, 500);
+    //sendToDatabase("SELECT count(*) as value FROM prosumers;", function(data){
+    //    prosumerProduction(data[0].value);
+    //});
 }
 
 function currrentConsumption(){
@@ -60,74 +58,98 @@ function sendToDatabase(sql, callback){
     });
 }
 
+//funkar som den ska
 function sendToMarket(id, amount){
     //Add to check if id already exists, the same id should never be able to send something twice (since the table is emptied every cycle), what to do if it does?
-    sendToDatabase("INSERT INTO market VALUES(" + id + ", " + amount + ");", function(data){});
+    sendToDatabase("DELETE FROM market WHERE id=" + id + ";", function(){
+        sendToDatabase("INSERT INTO market VALUES(" + id + ", " + amount + ");", function(){
+            console.log("User " + id + " sent " + amount + " power to market");
+        });
+    });
 }
 
+//Funkar som den ska, kan fucka om flera kör nära inpå utan async/promises eller liknande
 function getFromMarket(id, amount){
-    sendToDatabase("SELECT power FROM market WHERE power!=0;", function(data){
-        let availablePower = data[0].power;
-        if (availablePower >= amount){
-            let excess = availablePower-amount;
-            sendToDatabase("UPDATE market SET power =" + excess + " WHERE id=" + data[0].id + ";", function(data){
-                sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(data){
-                    let newPower = data[0].power + amount;
-                    sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(data){});
+    //Avoids negative values
+    if (amount < 0)
+        amount = amount * -1;
+
+    sendToDatabase("SELECT * FROM market WHERE power!=0;", function(marketData){
+        if (marketData[0] != undefined){
+            let availablePower = marketData[0].power;
+            if (availablePower >= amount){
+                let excess = availablePower-amount;
+                sendToDatabase("UPDATE market SET power =" + excess + " WHERE id=" + marketData[0].id + ";", function(){
+                    sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+                        let newPower = prosumerData[0].power + amount;
+                        sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(){
+                            console.log("User " + id + " bought " + amount + " power from market");
+                        });
+                    });
                 });
-            });
+            }
+
+            else{
+                sendToDatabase("DELETE FROM market WHERE id=" + marketData[0].id + ";", function(){
+                    sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+                        let newPower = prosumerData[0].power + availablePower;
+                        sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(){
+                            console.log("User " + id + " bought " + availablePower + " power from market (not enough to fulfill user demand)");
+                            getFromMarket(id, amount-availablePower);
+                        });
+                    });
+                });
+            }
         }
 
         else{
-            sendToDatabase("DELETE FROM prosumers WHERE id=" + data[0].id + ";", function(data){
-                sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(data){
-                    let newPower = data[0].power + availablePower;
-                    sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(data){
-                        getFromMarket(id, amount-availablePower);
-                    });
-                });
-            });
+            //Finns ingen energi på market, returna något fint om det?
+            console.log("Market empty");
         }
     });
 }
 
+//Funkar som den ska, kan fucka om flera kör nära inpå utan async/promises eller liknande
 function getFromBattery(id, amount){
-    sendToDatabase("SELECT battery FROM prosumers WHERE id="+ id + ";", function(data){
+    //Avoids negative values
+    if (amount < 0)
+        amount = amount * -1;
+    
+    sendToDatabase("SELECT battery, power FROM prosumers WHERE id="+ id + ";", function(data){
         let availablePower = data[0].battery;
         if (availablePower >= amount){
             let newBattery = availablePower-amount;
-            sendToDatabase("UPDATE prosumers SET battery=" + newBattery + " WHERE id=" + id + ";", function(data){
-                sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(data){
-                    let newPower = data[0].power + amount;
-                    sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(data){});
-                });
+            let newPower = data[0].power + amount;
+            sendToDatabase("UPDATE prosumers SET battery=" + newBattery + ", power=" + newPower + " WHERE id=" + id + ";", function(){
+                console.log("User " + id + " took " + amount + " power from battery");
             });
         }
 
         else{
-            sendToDatabase("UPDATE prosumers SET battery=0 WHERE id=" + id + ";", function data(){
-                sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(data){
-                    let newPower = data[0].power + availablePower;
-                    sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(data){
-                        //Return that we didnt get enough power from the battery
-                    });
-                });
+            let newPower = data[0].power + availablePower;
+            sendToDatabase("UPDATE prosumers SET battery=0, power=" + newPower + " WHERE id=" + id + ";", function (){
+                console.log("User " + id + " took " + availablePower + " power from battery (not enough to fulfill user demand)");
+                //Return that we didnt get enough power from the battery
             });
         }
     });
 }
 
+//Funkar som den ska
 function sendToBattery(id, amount){
     sendToDatabase("SELECT battery, batteryCapacity FROM prosumers WHERE id=" + id + ";", function(data){
-        console.log(id);
-        var currentBattery = data[0].battery;
-        var batteryCapacity =  data[0].batteryCapacity;
+        let currentBattery = data[0].battery;
+        let batteryCapacity =  data[0].batteryCapacity;
         
         //Automatically sell excess power?
         if (amount+currentBattery > batteryCapacity)
-            sendToDatabase("UPDATE prosumers SET battery =" + batteryCapacity +  " WHERE id=" + id + ";", function(data){});
+            sendToDatabase("UPDATE prosumers SET battery =" + batteryCapacity +  " WHERE id=" + id + ";", function(){
+                console.log("Battery of user " + id + " set to " + batteryCapacity);
+            });
         else
-            sendToDatabase("UPDATE prosumers SET battery =" + (amount+currentBattery) + " WHERE id=" + id + ";", function(data){});
+            sendToDatabase("UPDATE prosumers SET battery =" + (amount+currentBattery) + " WHERE id=" + id + ";", function(){
+                console.log("Battery of user " + id + " set to " + (amount+currentBattery));
+            });
     
     });
 }
@@ -138,9 +160,10 @@ function currentMarketPrice(){
     return marketPrice;
 }
 
+//Tror loopen skapar/kan skapa problem, lös på ett bättre sätt. Nestla allt i en stor eller fixa promises/async
 function prosumerProduction(prosumerCount){
     var power = 0;
-    for (let i = 1; i < prosumerCount+1; i++){
+    for (let i = 1; i < 2; i++){//i < prosumerCount+1; i++){
         //In the future also add a check for if the prosumer actually has a wind turbine, boolean isProducer
         //Also check the decimal of the power column in the database, might need to support more/less numbers in the future
         power = parseFloat((currentWindSpeed() * 0.2) - currrentConsumption());
@@ -149,10 +172,9 @@ function prosumerProduction(prosumerCount){
         console.log("Updated power of user " + i + " to " + power);
         if (power > 0){
             sendToDatabase("SELECT shareToMarket as value FROM prosumers WHERE id=" + i + ";", function(data){
-                console.log(i);
                 var percentageToMarket = data[0].value*0.01;
                 sendToMarket(i, power*percentageToMarket);
-                sendToBattery(i , power*(1-percentageToMarket));
+                sendToBattery(i, power*(1-percentageToMarket));
             });
         }
 
@@ -167,8 +189,8 @@ function prosumerProduction(prosumerCount){
             });
         }
 
-        if (power < 0)
-            blackout(i);
+        //if (power < 0)
+            //blackout(i);
     }
 }
 
