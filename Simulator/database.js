@@ -3,7 +3,7 @@ var createDist = require('distributions-normal');
 
 var con = mysql.createConnection({
     host: "localhost",
-    user: "piedpiper",
+    user: "root",
     password: "piedpiper"
 });
 
