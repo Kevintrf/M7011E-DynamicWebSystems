@@ -1,5 +1,5 @@
 const express = require('express');
-
+const APIroutes = require('./routes')
 const app = express();
 
 app.use(express.json());
@@ -7,16 +7,8 @@ app.use(express.json());
 const hostname = '127.0.0.1';
 const port = 3000;
 
+app.use('/api/test', APIroutes);
 
-/*
-        -här vill vi skicka json ist för http-
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Goodbye World\n');
-});
-*/
-
-server.listen(port, hostname, () => {
+app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
