@@ -1,11 +1,11 @@
 {
-  "name": "M7011E-DynamicWebSystems",
+  "name": "m7011e-dynamicwebsystems",
   "version": "1.0.0",
   "description": "Project in the course M7011E",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "npx nodemon simulator/app.js -w simulator"
+    "watch": "npx nodemon -L simulator/app.js -w Simulator"
   },
   "repository": {
     "type": "git",

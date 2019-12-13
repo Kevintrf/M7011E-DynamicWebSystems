@@ -11,3 +11,4 @@
 | 2019-12-06  | 1,5       |  DB layout, sync up work, solve local db problem      |
 | 2019-12-08 | 2       |  Git problems, API work/problems, learning more about RESTapi inorder to solve problems      |
 | 2019-12-09  | 1       |  Writing down our problems/questions to nicklas, looking over API and moving enviroment to MAC from linux machine inorder to be more mobile |
+| 2019-12-08 | 4       |  API work, tests in postman, getting DB to work and setting up so that kevins work works on my machine    |
