@@ -7,20 +7,28 @@ var con = mysql.createConnection({
     password: "piedpiper"
 });
 
+con.connect(function(err) {
+    if (err)
+        throw err;
+    console.log("Connected successfully");
+    con.query("USE node;");
+});
+
+module.exports = {
+    sendToDatabase: function (sql, callback) {
+        con.query(sql, function (err, result){
+            if (err) throw err;
+            callback(result);
+        });
+    }
+};
+
 function connect(dbname){
     con.connect(function(err) {
         if (err)
             throw err;
         console.log("Connected successfully");
         con.query("USE " + dbname + ";");
-    });
-}
-
-function sendToDatabase(sql, callback){
-    var output;
-    con.query(sql, function (err, result){
-        if (err) throw err;
-        callback(result);
     });
 }
 
