@@ -15,8 +15,8 @@ con.connect(function(err) {
 });
 
 module.exports = {
-    sendToDatabase: function (sql, callback) {
-        con.query(sql, function (err, result){
+    sendToDatabase: async function (sql, callback) {
+        con.query(sql, async function (err, result){
             if (err) throw err;
             callback(result);
         });
