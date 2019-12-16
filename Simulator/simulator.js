@@ -1,4 +1,3 @@
-var mysql = require('mysql');
 var createDist = require('distributions-normal');
 var db = require('./database'); 
 
@@ -7,11 +6,11 @@ var db = require('./database');
 //Runs function updateServer every second until stopFunction() is called
 setInterval(function(){ 
     updateServer() 
-}, 5000);
+}, 2000);
 
 async function updateServer() {
-    db.sendToDatabase("SELECT count(*) as value FROM prosumers;", function(data){
-        generatePower(1, data[0].value);
+    await db.sendToDatabase("SELECT count(*) as value FROM prosumers;", async function(data){
+        await generatePower(1, data[0].value);
         //powerCycle(data[0].value);
     });
 }
@@ -73,9 +72,12 @@ async function currentMarketPrice(){
 //funkar som den ska
 async function sendToMarket(id, amount){
     //Add to check if id already exists, the same id should never be able to send something twice (since the table is emptied every cycle), what to do if it does?
-    db.sendToDatabase("DELETE FROM market WHERE id=" + id + ";", function(){
-        db.sendToDatabase("INSERT INTO market VALUES(" + id + ", " + amount + ");", function(){
+    await db.sendToDatabase("DELETE FROM market WHERE id=" + id + ";", async function(){
+        await db.sendToDatabase("INSERT INTO market VALUES(" + id + ", " + amount + ");", async function(){
             console.log("User " + id + " sent " + amount + " power to market");
+            return new Promise(function(resolve, reject){
+                resolve('resolved');
+            });
         });
     });
 }
@@ -84,28 +86,31 @@ async function sendToMarket(id, amount){
 async function getFromMarket(id, amount){
     //Avoids negative values
     if (amount < 0)
-        amount = amount * -1;
+        amount = await amount * -1;
 
-    db.sendToDatabase("SELECT * FROM market WHERE power!=0;", function(marketData){
+    await db.sendToDatabase("SELECT * FROM market WHERE power!=0;", async function(marketData){
         if (marketData[0] != undefined){
             let availablePower = marketData[0].power;
             if (availablePower >= amount){
                 let excess = availablePower-amount;
-                db.sendToDatabase("UPDATE market SET power =" + excess + " WHERE id=" + marketData[0].id + ";", function(){
-                    db.sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+                await db.sendToDatabase("UPDATE market SET power =" + excess + " WHERE id=" + marketData[0].id + ";", async function(){
+                    await db.sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", async function(prosumerData){
                         let newPower = prosumerData[0].power + amount;
-                        db.sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", function(){
+                        await db.sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", async function(){
                             console.log("User " + id + " bought " + amount + " power from market");
+                            return new Promise(function(resolve, reject){
+                                resolve('resolved');
+                            });
                         });
                     });
                 });
             }
 
             else{
-                db.sendToDatabase("DELETE FROM market WHERE id=" + marketData[0].id + ";", function(){
-                    db.sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(prosumerData){
+                await db.sendToDatabase("DELETE FROM market WHERE id=" + marketData[0].id + ";", async function(){
+                    await db.sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", async function(prosumerData){
                         let newPower = prosumerData[0].power + availablePower;
-                        db.sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", async function(){
+                        await db.sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", async function(){
                             console.log("User " + id + " bought " + availablePower + " power from market (not enough to fulfill user demand)");
                             await getFromMarket(id, amount-availablePower);
                         });
@@ -117,6 +122,9 @@ async function getFromMarket(id, amount){
         else{
             //Finns ingen energi på market, returna något fint om det?
             console.log("User " + id + " tried to buy power but market was empty");
+            return new Promise(function(resolve, reject){
+                resolve('resolved');
+            });
         }
     });
 }
@@ -127,21 +135,27 @@ async function getFromBattery(id, amount){
     if (amount < 0)
         amount = amount * -1;
     
-    db.sendToDatabase("SELECT battery, power FROM prosumers WHERE id="+ id + ";", function(data){
+    await db.sendToDatabase("SELECT battery, power FROM prosumers WHERE id="+ id + ";", async function(data){
         let availablePower = data[0].battery;
         if (availablePower >= amount){
             let newBattery = availablePower-amount;
             let newPower = data[0].power + amount;
-            db.sendToDatabase("UPDATE prosumers SET battery=" + newBattery + ", power=" + newPower + " WHERE id=" + id + ";", function(){
+            await db.sendToDatabase("UPDATE prosumers SET battery=" + newBattery + ", power=" + newPower + " WHERE id=" + id + ";", async function(){
                 console.log("User " + id + " took " + amount + " power from battery");
+                return new Promise(function(resolve, reject){
+                    resolve('resolved');
+                });
             });
         }
 
         else{
             let newPower = data[0].power + availablePower;
-            db.sendToDatabase("UPDATE prosumers SET battery=0, power=" + newPower + " WHERE id=" + id + ";", function (){
+            await db.sendToDatabase("UPDATE prosumers SET battery=0, power=" + newPower + " WHERE id=" + id + ";", async function (){
                 console.log("User " + id + " took " + availablePower + " power from battery (not enough to fulfill user demand)");
                 //Return that we didnt get enough power from the battery
+                return new Promise(function(resolve, reject){
+                    resolve('resolved');
+                });
             });
         }
     });
@@ -149,18 +163,24 @@ async function getFromBattery(id, amount){
 
 //Funkar som den ska
 async function sendToBattery(id, amount){
-    db.sendToDatabase("SELECT battery, batteryCapacity FROM prosumers WHERE id=" + id + ";", function(data){
+    await db.sendToDatabase("SELECT battery, batteryCapacity FROM prosumers WHERE id=" + id + ";", async function(data){
         let currentBattery = data[0].battery;
         let batteryCapacity =  data[0].batteryCapacity;
         
         //Automatically sell excess power?
         if (amount+currentBattery > batteryCapacity)
-            db.sendToDatabase("UPDATE prosumers SET battery =" + batteryCapacity +  " WHERE id=" + id + ";", function(){
+            await db.sendToDatabase("UPDATE prosumers SET battery =" + batteryCapacity +  " WHERE id=" + id + ";", async function(){
                 console.log("Battery of user " + id + " set to " + batteryCapacity);
+                return new Promise(function(resolve, reject){
+                    resolve('resolved');
+                });
             });
         else
-            db.sendToDatabase("UPDATE prosumers SET battery =" + (amount+currentBattery) + " WHERE id=" + id + ";", function(){
+            await db.sendToDatabase("UPDATE prosumers SET battery =" + (amount+currentBattery) + " WHERE id=" + id + ";", async function(){
                 console.log("Battery of user " + id + " set to " + (amount+currentBattery));
+                return new Promise(function(resolve, reject){
+                    resolve('resolved');
+                });
             });
     
     });
@@ -168,7 +188,7 @@ async function sendToBattery(id, amount){
 
 //funkar
 async function resetPowerAllProsumers(){
-    db.sendToDatabase("UPDATE prosumers SET power=0, blackout=0;", function(){
+    await db.sendToDatabase("UPDATE prosumers SET power=0, blackout=0;", async function(){
         console.log("Power and blackout states of all prosumers have been reset")
     });
 }
@@ -183,44 +203,81 @@ async function generatePower(id, userAmount){
     if (id == 2){
         power = -1.35;
     }
-    await db.sendToDatabase("UPDATE prosumers SET power =" + power + " WHERE id=" + id + ";", function (data) {
+    await db.sendToDatabase("UPDATE prosumers SET power =" + power + " WHERE id=" + id + ";", async function(data) {
         console.log("Updated power of user " + id + " to " + power);
         if (id < userAmount){
-            generatePower(id+1, userAmount);
+            await generatePower(id+1, userAmount);
         }
         else {
-            handleExcessPower(1, userAmount);
+            await handleExcessPower(1, userAmount);
         }
     });
 }
 
 async function handleExcessPower(id, userAmount){
-    db.sendToDatabase("SELECT power, shareToMarket FROM prosumers WHERE id=" + id + ";", async function(prosumerData){
+    await db.sendToDatabase("SELECT power, shareToMarket FROM prosumers WHERE id=" + id + ";", async function(prosumerData){
         let power = prosumerData[0].power;
 
         if (power > 0){
             let percentageToMarket = prosumerData[0].shareToMarket*0.01;
             await sendToMarket(id, power*percentageToMarket);
             await sendToBattery(id, power*(1-percentageToMarket));
+
+            let promise1 = new Promise(function(resolve, reject) {
+                resolve(sendToMarket(id, power*percentageToMarket));
+            });
+
+            let promise2 = new Promise(function(resolve, reject) {
+                resolve(sendToBattery(id, power*(1-percentageToMarket)));
+            });
+
+            Promise.all([promise1, promise2]).then(async function(values) {
+                if (id < userAmount){
+                    await handleExcessPower(id+1, userAmount);
+                }
+                else {
+                    await handleMissingPower(1, userAmount);
+                }
+            });
         }
 
-        if (id < userAmount){
-            handleExcessPower(id+1, userAmount);
-        }
-        else {
-            handleMissingPower(1, userAmount);
+        else{
+            if (id < userAmount){
+                await handleExcessPower(id+1, userAmount);
+            }
+            else {
+                await handleMissingPower(1, userAmount);
+            }
         }
     });
 }
 
 async function handleMissingPower(id, userAmount){
-    db.sendToDatabase("SELECT power, marketSharePurchase FROM prosumers WHERE id=" + id + ";", async function(prosumerData){
+    await db.sendToDatabase("SELECT power, marketSharePurchase FROM prosumers WHERE id=" + id + ";", async function(prosumerData){
         let power = prosumerData[0].power;
-
+        console.log("handlemissingpower user " + id);
         if (power < 0){
             let percentageFromMarket = prosumerData[0].marketSharePurchase*0.01;
-            await getFromMarket(id, power*percentageFromMarket);
-            await getFromBattery(id, power*(1-percentageFromMarket));
+
+            let promise1 = new Promise(function(resolve, reject) {
+                resolve(getFromMarket(id, power*percentageFromMarket));
+            });
+
+            promise1.then(function(value) {
+                let promise2 = new Promise(function(resolve, reject) {
+                    resolve(getFromBattery(id, power*(1-percentageFromMarket)));
+                });
+
+                promise2.then(async function(value) {
+                    console.log("promise2");
+                    if (id < userAmount){
+                        await handleMissingPower(id+1, userAmount);
+                    }
+                    else {
+                        await checkBlackout(1, userAmount);
+                    }
+                });
+            });
             
             //Some asyncronous waiting fix, this code should only be run after the market and battery queries are completed
             //Tries to get all the power from market/battery, to avoid blackout, only happens if market/battery did not have enough
@@ -236,63 +293,35 @@ async function handleMissingPower(id, userAmount){
                 });
             });*/
         }
-        if (id < userAmount){
-            handleMissingPower(id+1, userAmount);
-        }
-        else {
-            checkBlackout(1, userAmount);
+        else{
+            if (id < userAmount){
+                await handleMissingPower(id+1, userAmount);
+            }
+            else {
+                await checkBlackout(1, userAmount);
+            }
         }
     });
 }
 
-//funkar som den ska
-//Blackout value (bit) in sql needs to be accessed as "SELECT blackout+0 FROM prosumers;", 
-//the +0 converts it to an integer otherwise it prints a literal bit (which will break stuff)
 async function checkBlackout(id, userAmount){
-    db.sendToDatabase("SELECT power FROM prosumers where id=" + id +";", function(prosumerData){
+    //Problem, select power queryn som utförs raden under hämtar power från innan buyFromMarket men efter getFromBattery
+    await db.sendToDatabase("SELECT power, blackout FROM prosumers where id=" + id +";", async function(prosumerData){
         let power = prosumerData[0].power;
+        let blackout = prosumerData[0].blackout;
         if (power < 0){
-            db.sendToDatabase("UPDATE prosumers SET blackout=1 WHERE id=" + id + ";", function(){
-                console.log("User " + id + " has experienced a blackout");
+            await db.sendToDatabase("UPDATE prosumers SET blackout=1 WHERE id=" + id + ";", async function(){
+                console.log("User " + id + " has experienced a blackout, currenpower: " + power);
+            });
+        }
+        else if (blackout == 1){
+            await db.sendToDatabase("UPDATE prosumers SET blackout=0 WHERE id=" + id + ";", async function(){
+                console.log("Blackout status removed from user " + id);
             });
         }
         if (id < userAmount){
-            checkBlackout(id+1, userAmount);
+            await checkBlackout(id+1, userAmount);
         }
     });
 }
 
-//---OBSELETE, ersatt av handleExcessPower och handleMissingPower------
-//funkar,
-function powerManagement(id){
-    db.sendToDatabase("SELECT power, shareToMarket, marketSharePurchase FROM prosumers WHERE id=" + id + ";", function(prosumerData){
-        let power = prosumerData[0].power;
-
-        if (power > 0){
-            let percentageToMarket = prosumerData[0].shareToMarket*0.01;
-            sendToMarket(id, power*percentageToMarket);
-            sendToBattery(id, power*(1-percentageToMarket));
-        }
-
-        else if (power < 0){
-            let percentageFromMarket = prosumerData[0].marketSharePurchase*0.01;
-            getFromMarket(id, power*percentageFromMarket);
-            getFromBattery(id, power*(1-percentageFromMarket));
-            
-            
-            //Some asyncronous waiting fix, this code should only be run after the market and battery queries are completed
-            //Tries to get all the power from market/battery, to avoid blackout, only happens if market/battery did not have enough
-            //Maybe should only be run if some setting in user interface allows it?
-            /*
-            db.sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(prosumerData){
-                let power = prosumerData[0].power;
-                getFromBattery(id, power);
-                //async and wait
-                db.sendToDatabase("SELECT power FROM prosumers WHERE id=" + id + ";", function(prosumerData){
-                    let power = prosumerData[0].power;
-                    getFromMarket(id, power);
-                });
-            });*/
-        }
-    });
-}

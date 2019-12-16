@@ -15,4 +15,5 @@
 |2019-12-07|2|Basic functionality for getting power from market/battery|
 |2019-12-09|3|Simulator work, db restructuring|
 |2019-12-12|4|Fixes and restructuring in simulator|
-|2019-12-13|12:00-pågår|Worked on async, various fixes/changes|
+|2019-12-13|4|Worked on async, various fixes/changes|
+|2019-12-16|3|Working on async, implemented new mysql promise package which breaks things and needs to be fixed|
