@@ -1,29 +1,9 @@
-//var mysql = require('mysql');
-var db = require('mysql-promise')();
+var mysql = require('mysql');
 var createDist = require('distributions-normal');
 
-db.configure({
-    "host": "localhost",
-    "user": "root",
-    "password": "piedpiper",
-    "database": "node"
-});
-
-
-module.exports = {
-    sendToDatabase: async function (sql, callback) {
-        db.query(sql, async function (err, result){
-            if (err) throw err;
-            callback(result);
-        });
-    }
-};
-
-//old, backup
-/*
 var con = mysql.createConnection({
     host: "localhost",
-    user: "root",
+    user: "piedpiper",
     password: "piedpiper"
 });
 
@@ -38,18 +18,10 @@ module.exports = {
     sendToDatabase: async function (sql, callback) {
         con.query(sql, async function (err, result){
             if (err) throw err;
-            callback(result);
+            await callback(await result);
         });
     }
 };
-*/
-
-
-
-
-
-
-
 
 
 

@@ -87,7 +87,6 @@ async function getFromMarket(id, amount){
     //Avoids negative values
     if (amount < 0)
         amount = await amount * -1;
-
     await db.sendToDatabase("SELECT * FROM market WHERE power!=0;", async function(marketData){
         if (marketData[0] != undefined){
             let availablePower = marketData[0].power;
@@ -99,7 +98,7 @@ async function getFromMarket(id, amount){
                         await db.sendToDatabase("UPDATE prosumers SET power=" + newPower + " WHERE ID=" + id +";", async function(){
                             console.log("User " + id + " bought " + amount + " power from market");
                             return new Promise(function(resolve, reject){
-                                resolve('resolved');
+                                resolve('resolved, market');
                             });
                         });
                     });
@@ -255,30 +254,32 @@ async function handleExcessPower(id, userAmount){
 async function handleMissingPower(id, userAmount){
     await db.sendToDatabase("SELECT power, marketSharePurchase FROM prosumers WHERE id=" + id + ";", async function(prosumerData){
         let power = prosumerData[0].power;
-        console.log("handlemissingpower user " + id);
         if (power < 0){
             let percentageFromMarket = prosumerData[0].marketSharePurchase*0.01;
 
-            let promise1 = new Promise(function(resolve, reject) {
-                resolve(getFromMarket(id, power*percentageFromMarket));
-            });
-
-            promise1.then(function(value) {
-                let promise2 = new Promise(function(resolve, reject) {
-                    resolve(getFromBattery(id, power*(1-percentageFromMarket)));
+            //Vill ha await innan new Promise men då krashar det, promise1.then väntar inte
+            let promise1 = new Promise(async function(resolve, reject) {
+                await getFromMarket(id, power*percentageFromMarket)
+                resolve();
+                
+                await promise1.then(function(value) {
+                    console.log("Market promise resvoled for id " + id);
+                    console.log(value);
+                    let promise2 = new Promise(function(resolve, reject) {
+                        resolve(getFromBattery(id, power*(1-percentageFromMarket)));
+                    });
+                    
+                    promise2.then(async function(value) {
+                        if (id < userAmount){
+                            await handleMissingPower(id+1, userAmount);
+                        }
+                        else {
+                            await checkBlackout(1, userAmount);
+                        }
+                    });
                 });
-
-                promise2.then(async function(value) {
-                    console.log("promise2");
-                    if (id < userAmount){
-                        await handleMissingPower(id+1, userAmount);
-                    }
-                    else {
-                        await checkBlackout(1, userAmount);
-                    }
-                });
             });
-            
+                
             //Some asyncronous waiting fix, this code should only be run after the market and battery queries are completed
             //Tries to get all the power from market/battery, to avoid blackout, only happens if market/battery did not have enough
             //Maybe should only be run if some setting in user interface allows it?
@@ -306,22 +307,28 @@ async function handleMissingPower(id, userAmount){
 
 async function checkBlackout(id, userAmount){
     //Problem, select power queryn som utförs raden under hämtar power från innan buyFromMarket men efter getFromBattery
-    await db.sendToDatabase("SELECT power, blackout FROM prosumers where id=" + id +";", async function(prosumerData){
-        let power = prosumerData[0].power;
-        let blackout = prosumerData[0].blackout;
-        if (power < 0){
-            await db.sendToDatabase("UPDATE prosumers SET blackout=1 WHERE id=" + id + ";", async function(){
-                console.log("User " + id + " has experienced a blackout, currenpower: " + power);
-            });
-        }
-        else if (blackout == 1){
-            await db.sendToDatabase("UPDATE prosumers SET blackout=0 WHERE id=" + id + ";", async function(){
-                console.log("Blackout status removed from user " + id);
-            });
-        }
-        if (id < userAmount){
-            await checkBlackout(id+1, userAmount);
-        }
-    });
+    //setTimeout(async function() {
+        await db.sendToDatabase("SELECT power, blackout FROM prosumers where id=" + id +";", async function(prosumerData){
+            let power = await prosumerData[0].power;
+            let blackout = await prosumerData[0].blackout;
+            if (power < 0){
+                await db.sendToDatabase("UPDATE prosumers SET blackout=1 WHERE id=" + id + ";", async function(){
+                    console.log("User " + id + " has experienced a blackout, currenpower: " + power);
+                });
+            }
+            else if (blackout == 1){
+                await db.sendToDatabase("UPDATE prosumers SET blackout=0 WHERE id=" + id + ";", async function(){
+                    console.log("Blackout status removed from user " + id);
+                });
+            }
+            else{
+                console.log("no blackout for " + id);
+            }
+            if (id < userAmount){
+                await checkBlackout(id+1, userAmount);
+            }
+        });
+      //}, 100);
+
 }
 
