@@ -18,3 +18,7 @@
 |2019-12-13|4|Worked on async, various fixes/changes|
 |2019-12-16|3|Working on async, implemented new mysql promise package which breaks things and needs to be fixed|
 |2019-12-17|4|More work on async, started reworking the entire system since it wasnt feasible to implement with its current design|
+|2019-12-19|1|Worked on remaking simulator|
+|2019-12-20|1|Short simulator work|
+|2020-01-03|3|Simulator rework|
+|2020-01-04|15:20-pågår|simulator|
