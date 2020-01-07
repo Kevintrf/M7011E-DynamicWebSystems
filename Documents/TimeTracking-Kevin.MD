@@ -21,4 +21,7 @@
 |2019-12-19|1|Worked on remaking simulator|
 |2019-12-20|1|Short simulator work|
 |2020-01-03|3|Simulator rework|
-|2020-01-04|15:20-pågår|simulator|
+|2020-01-04|3|Simulator now almost functional|
+|2020-01-05|2|Simulator + database|
+|2020-01-06|6|Sim|
+|2020-01-07|12:40-pågår|simsfhsf|

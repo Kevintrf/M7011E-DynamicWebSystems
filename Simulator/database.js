@@ -26,7 +26,6 @@ module.exports = {
 
 
 
-
 //---obselete----
 function connect(dbname){
     con.connect(function(err) {
