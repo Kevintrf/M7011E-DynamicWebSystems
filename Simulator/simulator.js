@@ -14,17 +14,28 @@ setInterval(async function(){
 async function updateProsumersFromDatabase(){
     await db.sendToDatabase("SELECT * FROM prosumers;", async function(data){
         var prosumerList = data;
+        var manager;
+
+        prosumerList.forEach(function(item, index) {
+            if (prosumerList[index].manager == true){
+                manager = index;
+            }
+        });
+
+        if (manager == undefined){
+            //NÅGOT HAR GÅTT HELT FEL, HJÄLP
+        }
 
         prosumerList.forEach(function(item, index) {
             generatePower(index, prosumerList);
         });
 
         prosumerList.forEach(function(item, index) {
-            handleExcessPower(index, prosumerList);
+            handleExcessPower(index, prosumerList, manager);
         });
 
         prosumerList.forEach(function(item, index) {
-            handleMissingPower(index, prosumerList);
+            handleMissingPower(index, prosumerList, manager);
         });
 
         prosumerList.forEach(function(item, index) {
@@ -112,7 +123,7 @@ function generatePower(index, prosumerList){
     console.log("User " + index + " power has been set to " + power);
 }
 
-function handleExcessPower(index, prosumerList){
+function handleExcessPower(index, prosumerList, manager){
     if (prosumerList[index].power > 0){
         console.log("excess power for user " + index);
         //Send to battery
@@ -152,7 +163,7 @@ function handleExcessPower(index, prosumerList){
     }
 }
 
-function handleMissingPower(index, prosumerList){
+function handleMissingPower(index, prosumerList, manager){
     if (prosumerList[index].power < 0){
         console.log("Missing power for user " + index);
 
