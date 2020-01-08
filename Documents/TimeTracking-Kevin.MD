@@ -24,4 +24,5 @@
 |2020-01-04|3|Simulator now almost functional|
 |2020-01-05|2|Simulator + database|
 |2020-01-06|6|Simulator|
-|2020-01-07|5|Fully functional simulator, started work on API|
+|2020-01-07|6|Fully functional simulator, started work on API|
+|2020-01-08|11:00-pågår|API and frontend|
