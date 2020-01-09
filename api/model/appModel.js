@@ -1,5 +1,7 @@
 'user strict';
 var sql = require('./db.js');
+var bcrypt = require('bcrypt');
+const saltRounds = 12; //Do not use a value lower than 12 for production code
 
 //Task object constructor
 var Task = function(task){
@@ -15,6 +17,57 @@ Task.getProsumerInfo = function (id, result) {;
         }
         else{
             result(null, res);
+        }
+    });
+};
+
+Task.registerUser = function (input, result) {
+    console.log("tjo");
+    var newUser = JSON.parse(input);
+    bcrypt.hash(newUser.password, saltRounds, function (err, hash){
+        console.log("Hash: " + hash);
+        sql.query("INSERT INTO users VALUES ('" + newUser.id + "','" + newUser.username + "','" + hash  + "') ", function (err, res) {
+            if (err){
+                result(err, null);
+            }
+            else{
+                //Res.redirect has to occur in appController.js the res in this function is not the same res we want to access
+                result(null, res.redirect('/home'));
+            }
+        });
+    });
+};
+
+Task.login = function (input, result) {
+    var login = JSON.parse(input);
+    sql.query("SELECT * FROM users WHERE username = '" + login.username + "' ", function (err, res) {
+        if (err){
+            result(err, null);
+        }
+
+        else{
+            if (res.length == 1){
+                bcrypt.compare(login.password, res[0].password, function (err, resultCompare) {
+                    if (err){
+                        result(err, null);
+                    }
+                    else{
+                        if (resultCompare == true){
+                            console.log("Correct password");
+                            result(null, res);
+                            //result(null, res.redirect('/home'));
+                        }
+                        else{
+                            console.log("Incorrect password");
+                            //Incorrect password!
+                        }
+                    }
+                });
+            }
+
+            else{
+                //Username not found, OR MULTIPLE USER FOUND!?! (should not happen! but username is unique in the database so this should be impossible)
+            }
         }
     });
 };
