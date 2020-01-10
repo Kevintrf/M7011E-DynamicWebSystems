@@ -9,30 +9,67 @@
     <meta name="author" content="">
     <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
-    <title>Signup</title>
-    <!-- Bootstrap core CSS -->
-    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>its signup time bitch</title>
 
     <!-- Custom styles for this template -->
     <link href="signin.css" rel="stylesheet">
   </head>
 
+  
+
   <body class="text-center">
-    <form class="form-signin">
-      <img class="mb-4" src="niklas.jpg" alt="Niklas, our lord on saviour" width="200" height="250">
+    <form class="signinForm" id="signinForm">
+      <img id="centerImage" class="mb-4" src="niklas.jpg" alt="Niklas, our lord on saviour" width="200" height="250">
       <h1 class="h3 mb-3 font-weight-normal">User registration</h1>
-      <label for="inputUsername" class="sr-only">Email address</label>
+      <span style="color:red;"><p id="errorMessage"></p></span>
+      <label for="inputUsername" class="sr-only">Username</label>
       <input type="username" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
       <label for="inputPassword" class="sr-only">Password</label>
       <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
       <br>
-      <p class="mt-5 mb-3 text-muted">&copy; hello yes</p>
+      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit">Register</button>
     </form>
 
+    <video autoplay muted loop id="myVideo">
+      <source src="background.mp4" type="video/mp4">
+    </video>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- Blev fel av att använda "slim js" istället för vanliga
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+-->
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script>
+  $("#signinForm").submit(function(event) {
+    event.preventDefault();
+
+    let username = document.getElementById("inputUsername").value;  
+    let password = document.getElementById("inputPassword").value;  
+    let loginCredentialsJson = '{"username":"' + username + '", "password":"' + password + '"}';
+
+    $.ajax({
+    url: "http://localhost:3000/api/registerUser/" + loginCredentialsJson,
+    type: "POST",
+    contentType: "plain/text",
+    success: function(status){
+      if (status == "correct"){
+        let url = "signup.html";
+        window.location = url;
+      }
+      else{
+        console.log("Username already in use");
+        $('#errorMessage').text("Username already in use"); 
+      }
+    },
+    error: function(status){
+      $('#errorMessage').text("Problem logging in: " + status); 
+    }
+  });
+
+
+  });
+
+  </script>
 </body>
 </html>

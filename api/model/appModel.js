@@ -22,9 +22,11 @@ Task.getProsumerInfo = function (id, result) {;
 };
 
 Task.registerUser = function (input, result) {
-    console.log("tjo");
-    var newUser = JSON.parse(input);
-    bcrypt.hash(newUser.password, saltRounds, function (err, hash){
+    var login = JSON.parse(input);
+
+    if ()
+
+    bcrypt.hash(input.password, saltRounds, function (err, hash){
         console.log("Hash: " + hash);
         sql.query("INSERT INTO users VALUES ('" + newUser.id + "','" + newUser.username + "','" + hash  + "') ", function (err, res) {
             if (err){

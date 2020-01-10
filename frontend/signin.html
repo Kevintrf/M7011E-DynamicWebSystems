@@ -13,15 +13,13 @@
 
     <!-- Custom styles for this template -->
     <link href="signin.css" rel="stylesheet">
-
-    <!-- Login handling -->
   </head>
 
   
 
   <body class="text-center">
     <form class="signinForm" id="signinForm">
-      <img class="mb-4" src="niklas.jpg" alt="Niklas, our lord on saviour" width="200" height="250">
+      <img id="centerImage" class="mb-4" src="niklas.jpg" alt="Niklas, our lord on saviour" width="200" height="250">
       <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
       <span style="color:red;"><p id="errorMessage"></p></span>
       <label for="inputUsername" class="sr-only">Username</label>
@@ -37,7 +35,6 @@
       <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit">Sign in</button>
       <br>
       <p>Don't have an account? <br> <a href="signup.html">Sign up</a></p>
-      <p class="mt-5 mb-3 text-muted">&copy; hello yes</p>
     </form>
 
     <video autoplay muted loop id="myVideo">
@@ -64,19 +61,16 @@
     contentType: "plain/text",
     success: function(status){
       if (status == "correct"){
-        let url = "127.0.0.1";
+        let url = "dashboard.html";
         window.location = url;
       }
       else{
         console.log("Incorrect username or password");
         $('#errorMessage').text("Incorrect username or password"); 
       }
-      console.log("Status: " + status);
     },
-    error: function(data, status){
+    error: function(status){
       $('#errorMessage').text("Problem logging in: " + status); 
-      console.log("Login failure");
-      console.log(data);
     }
   });
 
