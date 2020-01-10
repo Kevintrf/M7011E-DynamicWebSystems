@@ -26,4 +26,5 @@
 |2020-01-06|6|Simulator|
 |2020-01-07|6|Fully functional simulator, started work on API|
 |2020-01-08|7|API and frontend|
-|2020-01-09|7|Password management, frontend and API development|
+|2020-01-09|8|Password management, frontend and API development|
+|2020-01-10|10:50-pågår|grejer|

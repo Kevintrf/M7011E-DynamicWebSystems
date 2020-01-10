@@ -40,7 +40,7 @@ exports.insertUser = function(req, res){
 
 exports.getAllProsumers = function(req, res) {
   Task.getAllProsumers(function(err, task) {
-    console.log('controller')
+    console.log("reqsession: " + req.session)
     if (err)
       res.send(err);
       console.log('res', task);

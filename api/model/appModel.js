@@ -32,7 +32,7 @@ Task.registerUser = function (input, result) {
             }
             else{
                 //Res.redirect has to occur in appController.js the res in this function is not the same res we want to access
-                result(null, res.redirect('/home'));
+                result(null, res);
             }
         });
     });
@@ -54,11 +54,12 @@ Task.login = function (input, result) {
                     else{
                         if (resultCompare == true){
                             console.log("Correct password");
-                            result(null, res);
+                            result(null, "correct");
                             //result(null, res.redirect('/home'));
                         }
                         else{
                             console.log("Incorrect password");
+                            result(null, "incorrect");
                             //Incorrect password!
                         }
                     }
@@ -66,6 +67,8 @@ Task.login = function (input, result) {
             }
 
             else{
+                //Incorrect username
+                result(null, "incorrect");
                 //Username not found, OR MULTIPLE USER FOUND!?! (should not happen! but username is unique in the database so this should be impossible)
             }
         }
