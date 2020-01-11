@@ -9,7 +9,6 @@ app.use(session({
   //'secret': secret //Random secret, all sessions are invalid after server restart
   'secret': 'rh1fbygu58f8zzcgmjg84l', //Fixed secret, will last between sessions. More unsafe? If so, how?
   'cookie.maxAge': '3600000' //Cookie expiration is one hour (in ms)
-
 }))
 
 const mysql = require('mysql');

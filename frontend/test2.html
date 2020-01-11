@@ -1,0 +1,61 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
+
+    <title>its test time bitch</title>
+
+    <!-- Custom styles for this template -->
+  </head>
+
+
+
+  <p id="id"></p>
+  <p id="battery"></p>
+  <p id="batteryCapacity"></p>
+  <p id="power"></p>
+  <p id="production"></p>
+  <p id="consumption"></p>
+  <p id="blackout"></p>
+
+<br><br><br>
+
+  <p id="textBox"></p>
+
+<body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+
+setInterval(function(){
+  
+  $.ajax({
+    url: "http://localhost:3000/api/getMyProsumer/",
+    type: "GET",
+    contentType: "plain/text",
+    success: function(status){
+      let prosumer = JSON.parse(status);
+      $('#id').text("id: " + prosumer[0].id); 
+      $('#battery').text("battery: " + prosumer[0].battery); 
+      $('#batteryCapacity').text("batteryCapacity: " + prosumer[0].batteryCapacity); 
+      $('#power').text("power: " + prosumer[0].power); 
+      $('#production').text("production: " + prosumer[0].production); 
+      $('#consumption').text("consumption: " + prosumer[0].consumption); 
+      $('#blackout').text("blackout: " + prosumer[0].blackout); 
+      //$('#textBox').text("Success: " + status); 
+    },
+    error: function(status){
+      $('#textBox').text("Error: " + status); 
+    }
+  });
+
+}, 1000);
+   
+
+  </script>
+</body>
+</html>

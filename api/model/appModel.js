@@ -10,7 +10,45 @@ var Task = function(task){
     this.created_at = new Date();
 };
 
-Task.getProsumerInfo = function (id, result) {;
+Task.checkSession = function (req, result){
+    if (req.session.userid){
+        result(null, "loggedin");
+    }
+
+    else{
+        result(null, "loggedout");
+    }
+}
+
+Task.logout = function (req, result){
+    req.session.userid = null;
+    result(null, "success");
+}
+
+Task.getMyProsumer = function (req, result) {
+
+    //Check for if the userid actually has a prosumer set up
+
+
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT * FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
+            }
+            else{
+                let prosumer = JSON.stringify(res);
+                result(null, prosumer);
+            }
+        });
+    }
+
+    else{
+        result(null, "loggedout");
+    }
+};
+
+Task.getProsumerInfo = function (id, result) {
     sql.query("SELECT * FROM prosumers WHERE id = ? ", id, function (err, res) {  
         if (err){
             result(err, null);
@@ -22,25 +60,37 @@ Task.getProsumerInfo = function (id, result) {;
 };
 
 Task.registerUser = function (input, result) {
-    var login = JSON.parse(input);
+    var newUser = JSON.parse(input);
 
-    if ()
+    sql.query("SELECT username FROM users WHERE username='" + newUser.username + "' ", function (err, res) {
+        if (err){
+            console.log(err);
+            result(err, null);
+        }
 
-    bcrypt.hash(input.password, saltRounds, function (err, hash){
-        console.log("Hash: " + hash);
-        sql.query("INSERT INTO users VALUES ('" + newUser.id + "','" + newUser.username + "','" + hash  + "') ", function (err, res) {
-            if (err){
-                result(err, null);
+        else{
+            if (res.length == 0){
+                bcrypt.hash(newUser.password, saltRounds, function (err, hash){
+                    sql.query("INSERT INTO users VALUES (null, '" + newUser.username + "', '" + hash  + "') ", function (err, res) {
+                        if (err){
+                            console.log(err);
+                            result(err, null);
+                        }
+                        else{
+                            result(null, "success");
+                        }
+                    });
+                });
             }
+            
             else{
-                //Res.redirect has to occur in appController.js the res in this function is not the same res we want to access
-                result(null, res);
+                result(null, "usernameTaken");
             }
-        });
+        }
     });
 };
 
-Task.login = function (input, result) {
+Task.login = function (input, req, result) {
     var login = JSON.parse(input);
     sql.query("SELECT * FROM users WHERE username = '" + login.username + "' ", function (err, res) {
         if (err){
@@ -56,8 +106,8 @@ Task.login = function (input, result) {
                     else{
                         if (resultCompare == true){
                             console.log("Correct password");
+                            req.session.userid = res[0].id;
                             result(null, "correct");
-                            //result(null, res.redirect('/home'));
                         }
                         else{
                             console.log("Incorrect password");
@@ -73,18 +123,6 @@ Task.login = function (input, result) {
                 result(null, "incorrect");
                 //Username not found, OR MULTIPLE USER FOUND!?! (should not happen! but username is unique in the database so this should be impossible)
             }
-        }
-    });
-};
-
-Task.insertUser = function (input, result) {
-    const newUser = JSON.parse(input);
-    sql.query("INSERT INTO users VALUES ('" + newUser.id + "','" + newUser.username + "','" + newUser.password + "') ", function (err, res) {
-        if (err){
-            result(err, null);
-        }
-        else{
-            result(null, res);
         }
     });
 };
@@ -126,4 +164,4 @@ Task.getAllProsumers = function (result) {
     });   
 };
 
-module.exports= Task;
+module.exports = Task;

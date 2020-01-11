@@ -53,17 +53,19 @@
     type: "POST",
     contentType: "plain/text",
     success: function(status){
-      if (status == "correct"){
-        let url = "signup.html";
+      if (status == "success"){
+        let url = "dashboard.html";
         window.location = url;
       }
-      else{
-        console.log("Username already in use");
+      else if (status == "usernameTaken"){
         $('#errorMessage').text("Username already in use"); 
+      }
+      else{
+        $('#errorMessage').text("Account could not be registered"); 
       }
     },
     error: function(status){
-      $('#errorMessage').text("Problem logging in: " + status); 
+      $('#errorMessage').text("Problem signing up: " + status); 
     }
   });
 

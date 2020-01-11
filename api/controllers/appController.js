@@ -2,67 +2,87 @@
 
 var Task = require('../model/appModel.js');
 
-exports.getProsumerInfo = function(req, res){
-  Task.getProsumerInfo(req.params.query, function(err, task) {
+exports.checkSession = function(req, res){
+  Task.checkSession(req, function(err, result) {
     if (err)
       res.send(err);
 
-    res.send(task);
+    res.send(result);
+  });
+};
+
+exports.getMyProsumer = function(req, res){
+  Task.getMyProsumer(req, function(err, result) {
+    if (err)
+      res.send(err);
+
+    res.send(result);
+  });
+};
+
+exports.getProsumerInfo = function(req, res){
+  Task.getProsumerInfo(req.params.query, function(err, result) {
+    if (err)
+      res.send(err);
+
+    res.send(result);
   });
 };
 
 exports.registerUser = function(req, res){
-  Task.registerUser(req.params.query, function(err, task) {
+  Task.registerUser(req.params.query, function(err, result) {
     if (err)
       res.send(err);
 
-    res.send(task);
+    res.send(result);
   });
 };
 
 exports.login = function(req, res){
-  Task.login(req.params.query, function(err, task) {
-    if (err)
-      res.send(err);
-
-    res.send(task);
-  });
-};
-
-exports.insertUser = function(req, res){
-  Task.insertUser(req.params.query, function(err, task) {
-    if (err)
-      res.send(err);
-
-    res.send(task);
-  });
-};
-
-exports.getAllProsumers = function(req, res) {
-  Task.getAllProsumers(function(err, task) {
-    console.log("reqsession: " + req.session)
-    if (err)
-      res.send(err);
-      console.log('res', task);
-    res.send(task);
-  });
-};
-
-exports.insertProsumer = function(req, res) {
-  Task.insertProsumer(req.params.query, function(err, task) {
+  Task.login(req.params.query, req, function(err, result) {
     if (err){
       res.send(err);
     }
 
-    res.send(task);
+    res.send(result);
+  });
+};
+
+exports.logout = function(req, res){
+  Task.login(req, function(err, result) {
+    if (err){
+      res.send(err);
+    }
+
+    res.send(result);
+  });
+};
+
+exports.getAllProsumers = function(req, res) {
+  Task.getAllProsumers(function(err, result) {
+    console.log("reqsession: " + req.session)
+    if (err)
+      res.send(err);
+      console.log('res', result);
+    res.send(result);
+  });
+};
+
+exports.insertProsumer = function(req, res) {
+  Task.insertProsumer(req.params.query, function(err, result) {
+    if (err){
+      res.send(err);
+    }
+
+    res.send(result);
   });
 };
 
 exports.getProsumerById = function(req, res) {
-  Task.getProsumerById(req.params.query, function(err, task) {
+  Task.getProsumerById(req.params.query, function(err, result) {
     if (err)
       res.send(err);
     
-    res.json(task);
+    res.json(result);
   });
 };
