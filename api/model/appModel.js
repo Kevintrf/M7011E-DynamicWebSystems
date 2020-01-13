@@ -127,15 +127,52 @@ Task.login = function (input, req, result) {
     });
 };
 
-Task.insertProsumer = function (id, result) {
-    sql.query("INSERT INTO prosumers VALUES (?, 0, 0, 0, 0, 0, 0, 0, 0, false, true) ", id, function (err, res) {
-        if (err){
-            result(err, null);
-        }
-        else{
-            result(null, res);
-        }
-    });
+Task.createProsumer = function (input, req, result) {
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT * FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
+            }
+            else{
+                if (res.length == 0){
+                    var newProsumer = JSON.parse(input);
+
+                    if (input.battery < 0){
+                        result("invalidBattery", null);
+                    }
+
+                    else if (input.shareToMarket > 100 || input.shareToMarket < 0){
+                        result("invalidShareToMarket", null);
+                    }
+
+                    else if (input.marketSharePurchase > 100 || input.marketSharePurchase < 0){
+                        result("invalidMarketSharePurchase", null);
+                    }
+
+                    else{
+                        sql.query("INSERT INTO prosumers VALUES ('" + id + "', 0, '" + newProsumer.batteryCapacity + "', 0, 0, 0, '" + newProsumer.shareToMarket + "', '" + newProsumer.marketSharePurchase + "', 0, false, " + newProsumer.producer + ", null) ", function (err, res) {
+                            if (err){
+                                console.log(err);
+                                result(err, null);
+                            }
+                            else{
+                                result(null, "success");
+                            }
+                        });
+                    }
+                }
+                
+                else{
+                    result(null, "alreadyExists");
+                }
+            }
+        });
+    }
+
+    else{
+        result(null, "loggedout");
+    }
 };
 
 Task.getProsumerById = function (id, result) {

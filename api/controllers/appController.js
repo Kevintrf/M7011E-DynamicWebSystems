@@ -49,7 +49,7 @@ exports.login = function(req, res){
 };
 
 exports.logout = function(req, res){
-  Task.login(req, function(err, result) {
+  Task.logout(req, function(err, result) {
     if (err){
       res.send(err);
     }
@@ -68,8 +68,8 @@ exports.getAllProsumers = function(req, res) {
   });
 };
 
-exports.insertProsumer = function(req, res) {
-  Task.insertProsumer(req.params.query, function(err, result) {
+exports.createProsumer = function(req, res) {
+  Task.createProsumer(req.params.query, req, function(err, result) {
     if (err){
       res.send(err);
     }

@@ -62,6 +62,8 @@ function updateDatabaseProsumerEntry(index, prosumerList){
         ", production=" + prosumerList[index].production + 
         ", consumption =" + prosumerList[index].consumption + 
         ", blackout=" + prosumerList[index].blackout + 
+        ", date=" + Date.now() + 
+        ", wind=" + prosumerList[index].wind +
         " WHERE id=" + prosumerList[index].id, function(data){
             console.log("Database entry updated for user " + index);
         });
@@ -116,7 +118,8 @@ function generatePower(index, prosumerList){
     //const windSpeed = await parseFloat(await currentWindSpeed());
     //onst consumption = await parseFloat(await currrentConsumption());
     //const power = await parseFloat((await windSpeed * 0.2) - await consumption);
-    let production = parseFloat(currentWindSpeed() * 0.2);
+    let windspeed = currentWindSpeed();
+    let production = parseFloat(windspeed * 0.2);
     console.log("prod " + production);
     let consumption = currrentConsumption();
     console.log("cons " + consumption);
@@ -124,6 +127,7 @@ function generatePower(index, prosumerList){
     console.log("power "+ power);
     //let power = await parseFloat((await currentWindSpeed() * 0.2) - await currrentConsumption());
 
+    prosumerList[index].wind = windspeed;
     prosumerList[index].production = production;
     prosumerList[index].consumption = consumption;
     prosumerList[index].power = power;

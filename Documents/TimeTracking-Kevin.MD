@@ -2,9 +2,9 @@
 
 | Date  |      Hours    | Activity                                       |
 | ----------- | ------- |------------------------------------------------
-| 2019-11-05  | 1       |  Setting up nodejs enviorment and researching nodejs|
-| 2019-11-07|1|Group meeting, setting up git and planning the project|
-| 2019-11-11|2|Group meeting, setting up database, researching/testing nodejs|
+|2019-11-05|1|Setting up nodejs enviorment and researching nodejs|
+|2019-11-07|1|Group meeting, setting up git and planning the project|
+|2019-11-11|2|Group meeting, setting up database, researching/testing nodejs|
 |2019-11-25|2|Worked on db and secure password handling|
 |2019-11-25|2|Worked on simulation and got confused by javascript|
 |2019-11-26|3|Simulator and database work|
@@ -29,3 +29,5 @@
 |2020-01-09|8|Password management, frontend and API development|
 |2020-01-10|7|Frontend and API, working signin and password authentication|
 |2020-01-11|5|Signup and session handling, frontend work|
+|2020-01-12|4|Frontend|
+|2020-01-13|5|Frontend work|
