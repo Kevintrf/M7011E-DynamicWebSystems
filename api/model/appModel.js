@@ -1,5 +1,7 @@
 'user strict';
 var sql = require('./db.js');
+var multer = require('multer');
+const upload = multer({dest: __dirname + '/uploads'});
 var bcrypt = require('bcrypt');
 const saltRounds = 12; //Do not use a value lower than 12 for production code
 
@@ -151,7 +153,7 @@ Task.createProsumer = function (input, req, result) {
                     }
 
                     else{
-                        sql.query("INSERT INTO prosumers VALUES ('" + id + "', 0, '" + newProsumer.batteryCapacity + "', 0, 0, 0, '" + newProsumer.shareToMarket + "', '" + newProsumer.marketSharePurchase + "', 0, false, " + newProsumer.producer + ", null) ", function (err, res) {
+                        sql.query("INSERT INTO prosumers VALUES ('" + id + "', 0, '" + newProsumer.batteryCapacity + "', 0, 0, 0, '" + newProsumer.shareToMarket + "', '" + newProsumer.marketSharePurchase + "', 0, false, " + newProsumer.producer + ", null, null) ", function (err, res) {
                             if (err){
                                 console.log(err);
                                 result(err, null);
@@ -174,6 +176,13 @@ Task.createProsumer = function (input, req, result) {
         result(null, "loggedout");
     }
 };
+
+Task.uploadImage = function (req, result){
+    if(req.file)
+        console.log("req file found!");
+
+    result(null, "default");
+}
 
 Task.getProsumerById = function (id, result) {
     sql.query("SELECT * FROM prosumers WHERE id = ? ", id, function (err, res) {             

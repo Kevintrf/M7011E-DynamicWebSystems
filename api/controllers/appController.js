@@ -58,6 +58,17 @@ exports.logout = function(req, res){
   });
 };
 
+exports.uploadImage = function(req, res){
+  Task.uploadImage(req, function(err, result){
+    if(err){
+      res.send(err);    
+    }
+
+    res.send(result);
+
+  });
+}
+
 exports.getAllProsumers = function(req, res) {
   Task.getAllProsumers(function(err, result) {
     console.log("reqsession: " + req.session)

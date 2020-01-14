@@ -87,9 +87,9 @@
                 <tr>
                   <th>Production</th>
                   <th>Consumption</th>
+                  <th>Net production</th>
                   <th>Windspeed</th>
                   <th>Battery</th>
-                  <th>Power</th>
                   <th>Blackout</th>
                   <th>Date</th>
                 </tr>
@@ -98,9 +98,9 @@
                 <tr>
                   <td id="production"></td>
                   <td id="consumption"></td>
+                  <td id="netProduction"></td>
                   <td id="windspeed"></td>
                   <td id="battery"></td>
-                  <td id="power"></td>
                   <td id="blackout"></td>
                   <td id="date"></td>
                 </tr>
@@ -195,7 +195,7 @@
             $('#consumption').text(prosumer[0].consumption); 
             $('#windspeed').text(prosumer[0].wind); 
             $('#battery').text(prosumer[0].battery + " / " + prosumer[0].batteryCapacity); 
-            $('#power').text(prosumer[0].power); 
+            $('#netProduction').text((prosumer[0].production - prosumer[0].consumption).toFixed(4)); 
             $('#blackout').text(prosumer[0].blackout);
             var d = new Date(prosumer[0].date);
             $('#date').text(d.getHours() + ":"+ d.getMinutes() + ":" + d.getSeconds() + " " + d.toDateString());

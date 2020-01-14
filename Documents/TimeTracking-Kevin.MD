@@ -31,3 +31,4 @@
 |2020-01-11|5|Signup and session handling, frontend work|
 |2020-01-12|4|Frontend|
 |2020-01-13|5|Frontend work|
+|2020-01-14|5|Frontend, work on file upload|

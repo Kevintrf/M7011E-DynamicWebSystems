@@ -1,0 +1,17 @@
+--Prosumer--
+-Create generic good looking errormessage box
+	Implement errorbox on all frontend pages
+-Correct error handling for frontend houseSetup
+-Upload picture in houseSetup
+	-Show picture somewhere on dashboard
+-Add updateHouse page
+-Calculate electricity market price in simulator
+	-Collect and print electricity price in fronend
+-"The Prosumer can read values from the simulator, and values should be sampled at a rate of 0.1 Hz or higher" Fix correct sample rate
+
+--Manager--
+-Check what more to add
+
+--Simulator--
+-Calculate electricity market price
+-Check what more to add

@@ -129,15 +129,16 @@
                 <input type="range" min="0" max="100" value="50" class="slider" id="missingMarket">
               </div>
               <br>
-              <h3>House image</h3>
-              <div class="custom-file">
-                  <input type="file" class="custom-file-input" id="customFile">
-                  <label class="custom-file-label" for="customFile">Choose file</label>
-              </div>
-
-              <br><br>
               <button type="submit" class="btn btn-primary">Submit</button>
+              <br><br>
+              <br><br>
+              
             </form>
+            <h3>House image</h3>
+              <form method="post" enctype="multipart/form-data" action="http://localhost:3000/api/uploadImage/">
+                <input type="file" name="file">
+                <br><br><input type="submit" value="Upload image">
+              </form>
         </main>
       </div>
     </div>
@@ -159,6 +160,7 @@
     <script>
     $("#houseSetupForm").submit(function(event) {
         event.preventDefault();
+
         var prosumer = {};
 
         if (document.getElementById("producerCheck").checked == true){
@@ -171,14 +173,24 @@
         prosumer.batteryCapacity = document.getElementById("batteryCapacity").value; 
         prosumer.shareToMarket  = document.getElementById("excessMarket").value; 
         prosumer.marketSharePurchase = document.getElementById("missingMarket").value; 
-        //Image needs additional javascript to actually pick up the image from the form
-        prosumer.image = "HAUSE!!! :DDDDD";
 
         if (prosumer.batteryCapacity < 0){
           console.log("NULL!!!!");
         }
 
+        /*let file = document.getElementById("houseImage").files[0];
+        if (file != undefined){
+          console.log(file);
+          var json = {};
+          json.image = file;
+          console.log(json);
+          //Test shit
+
+          prosumer.image = file;
+        }*/
+
         console.log(prosumer);
+        
         $.ajax({
           url: "http://localhost:3000/api/createProsumer/" + JSON.stringify(prosumer),
           type: "POST",
@@ -200,6 +212,30 @@
         });
 
     });
+
+    function uploadImage(){
+      let file = document.getElementById("houseImage").files[0];
+      if (file != undefined){
+        //do shit
+        console.log(file);
+      }
+
+      /*$.ajax({
+          url: "http://localhost:3000/api/uploadHouseImage/",
+          type: 'post',
+          dataType: 'json',
+          data: data,
+          processData: false,
+          contentType: false,
+          success: function(status)
+          {
+            console.log("image uploaded successfully");
+          },
+          error: function(status){
+            console.log("error uploading image");
+          }
+      });*/
+    };
     
     </script>
 

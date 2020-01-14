@@ -18,6 +18,9 @@ module.exports = function(app) {
   app.route('/api/registerUser/:query')
   .post(controller.registerUser);
 
+  app.route('/api/uploadImage/')
+  .post(controller.uploadImage);
+
   app.route('/api/login/:query')
   .post(controller.login);
 
