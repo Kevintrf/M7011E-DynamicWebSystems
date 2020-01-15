@@ -11,8 +11,8 @@ exports.checkSession = function(req, res){
   });
 };
 
-exports.getMyProsumer = function(req, res){
-  Task.getMyProsumer(req, function(err, result) {
+exports.getDashboardProsumer = function(req, res){
+  Task.getDashboardProsumer(req, function(err, result) {
     if (err)
       res.send(err);
 

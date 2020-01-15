@@ -91,6 +91,7 @@
                   <th>Windspeed</th>
                   <th>Battery</th>
                   <th>Blackout</th>
+                  <th>Market price</th>
                   <th>Date</th>
                 </tr>
               </thead>
@@ -102,6 +103,7 @@
                   <td id="windspeed"></td>
                   <td id="battery"></td>
                   <td id="blackout"></td>
+                  <td id="marketPrice"></td>
                   <td id="date"></td>
                 </tr>
               </tbody>
@@ -175,7 +177,7 @@
   var date = 0;
   setInterval(function(){
     $.ajax({
-      url: "http://localhost:3000/api/getMyProsumer/",
+      url: "http://localhost:3000/api/getDashboardProsumer/",
       type: "GET",
       contentType: "plain/text",
       success: function(status){
@@ -197,6 +199,12 @@
             $('#battery').text(prosumer[0].battery + " / " + prosumer[0].batteryCapacity); 
             $('#netProduction').text((prosumer[0].production - prosumer[0].consumption).toFixed(4)); 
             $('#blackout').text(prosumer[0].blackout);
+            if (prosumer[1].useCustomPrice == 0){
+              $('#marketPrice').text(prosumer[1].modelPrice);
+            }
+            else{
+              $('#marketPrice').text(prosumer[1].customPrice);
+            }
             var d = new Date(prosumer[0].date);
             $('#date').text(d.getHours() + ":"+ d.getMinutes() + ":" + d.getSeconds() + " " + d.toDateString());
 
@@ -207,7 +215,7 @@
         $('#textBox').text("Error: " + status); 
       }
     });
-  }, 1000);
+  }, 800);
     </script>
 
     <script>

@@ -2,6 +2,8 @@ var createDist = require('distributions-normal');
 var db = require('./database'); 
 
 var market = 0;
+var marketPriceMultiplier = 100;
+var marketPrice = 0;
 
 //Runs the program every second
 setInterval(async function(){
@@ -13,6 +15,10 @@ async function updateProsumersFromDatabase(){
         await db.sendToDatabase("SELECT * FROM prosumers;", async function(data){
             var prosumerList = data;
             var manager;
+            var marketSupply = 0;
+            var marketDemand = 0;
+
+            //(demand/supply)*value
 
             prosumerList.forEach(function(item, index) {
                 if (prosumerList[index].manager == true){
@@ -25,7 +31,18 @@ async function updateProsumersFromDatabase(){
             }
 
             prosumerList.forEach(function(item, index) {
-                generatePower(index, prosumerList);
+                generatePower(index, prosumerList, market);
+            });
+
+            prosumerList.forEach(function(item, index) {
+                if (prosumerList[index].power > 0){
+                    marketSupply += prosumerList[index].power;
+                }
+
+                else if (prosumerList[index].power < 0){
+                    marketDemand += (prosumerList[index].power * -1);
+                }
+                marketPrice = (marketDemand/marketSupply)*marketPriceMultiplier;
             });
 
             prosumerList.forEach(function(item, index) {
@@ -41,7 +58,7 @@ async function updateProsumersFromDatabase(){
             });
 
             prosumerList.forEach(function(item, index) {
-                updateDatabaseProsumerEntry(index, prosumerList);
+                updateDatabaseProsumerEntry(index, prosumerList, marketPrice, marketSupply, marketDemand);
             });
         });
     }
@@ -52,7 +69,7 @@ async function updateProsumersFromDatabase(){
 }
 
 //https://stackoverflow.com/questions/4205181/insert-into-a-mysql-table-or-update-if-exists for INSERT INTO or UPDATE IF EXIST
-function updateDatabaseProsumerEntry(index, prosumerList){
+function updateDatabaseProsumerEntry(index, prosumerList, marketPrice, marketSupply, marketDemand){
     console.log("updating database for user " + index);
 
     //Kommer krasha om prosumern inte redan finns
@@ -66,6 +83,19 @@ function updateDatabaseProsumerEntry(index, prosumerList){
         ", wind=" + prosumerList[index].wind +
         " WHERE id=" + prosumerList[index].id, function(data){
             console.log("Database entry updated for user " + index);
+        });
+    }
+
+    catch (e){
+        console.log("Error updating database: " + e);
+    }
+
+    //Uppdaterar ALLA möjliga entries i market
+    try{
+        db.sendToDatabase("UPDATE market SET demand =" + marketDemand + 
+        ", supply=" + marketSupply + 
+        ", modelPrice=" + marketPrice, function(data){
+            console.log("Database entry updated for market " + index);
         });
     }
 

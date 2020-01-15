@@ -27,11 +27,8 @@ Task.logout = function (req, result){
     result(null, "success");
 }
 
-Task.getMyProsumer = function (req, result) {
-
+Task.getDashboardProsumer = function (req, result) {
     //Check for if the userid actually has a prosumer set up
-
-
     if (req.session.userid){
         let id = req.session.userid;
         sql.query("SELECT * FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
@@ -39,8 +36,18 @@ Task.getMyProsumer = function (req, result) {
                 result(err, null);
             }
             else{
-                let prosumer = JSON.stringify(res);
-                result(null, prosumer);
+                sql.query("SELECT * FROM market ", function (err, res2) {  
+                    if (err){
+                        result (err, null);
+                    }
+                    else{
+                        //let prosumer = JSON.stringify(res);
+
+                        let newArray = res.concat(res2);
+                        console.log(JSON.stringify(newArray));
+                        result(null, JSON.stringify(newArray));
+                    }
+                });
             }
         });
     }

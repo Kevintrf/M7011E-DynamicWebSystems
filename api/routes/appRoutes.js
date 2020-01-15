@@ -12,8 +12,8 @@ module.exports = function(app) {
   app.route('/api/get')
   .get(controller.getProsumerById);
 
-  app.route('/api/getMyProsumer')
-  .get(controller.getMyProsumer);
+  app.route('/api/getDashboardProsumer')
+  .get(controller.getDashboardProsumer);
 
   app.route('/api/registerUser/:query')
   .post(controller.registerUser);
