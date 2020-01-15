@@ -1,0 +1,357 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
+
+    <title>Dashboard</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="dashboard.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Pied Piper</a>
+      <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+          <a class="nav-link" href="#" onclick="logout();">Sign out</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+          <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="nav-link active" href="#">
+                  <span data-feather="home"></span>
+                  Dashboard <span class="sr-only">(current)</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="file"></span>
+                  Orders
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="shopping-cart"></span>
+                  Products
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="users"></span>
+                  Customers
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="bar-chart-2"></span>
+                  Reports
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="layers"></span>
+                  Integrations
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2">Dashboard</h1>
+          </div>
+
+          <h2>Powerplant</h2>
+          <h4 id="powerplantStatus">Status:</h4>
+            
+          <button type="button" class="btn btn-primary" onclick="startPowerPlant();">Start</button>
+          <button type="button" class="btn btn-danger" onclick="stopPowerPlant();">Stop</button>
+
+          <h2>Market</h2>
+          <h4 id="currentDemand">Current demand:</h4>
+          <h4 id="currentSupply">Current supply:</h4>
+          <h4 id="currentPrice">Current price:</h4>
+          <h4 id="modelPrice">Suggested price:</h4>
+          <form id="customPriceForm">
+          <div class="form-group">
+            <h3>Enter custom price</h3>
+            <input type="number" class="form-control" id="customPrice" placeholder="5 krona pls" step="0.01" min="0.01" max="9999.99" required>
+            <small id="customPriceHelp" class="form-text text-muted">Prosumers will pay this price instead of the suggested price if you have selected "Use custom price"</small>
+          </div>
+          <button type="submit" class="btn btn-primary">Change custom price</button>
+          </form>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="customPriceCheck" id="customPriceCheck" onclick="customPriceCheck();">
+            <h4>
+              Use static custom price
+            </h4>
+          </div>
+
+          <h2>Powerplant production</h2>
+          <div class="table-responsive">
+            <table class="table table-striped table-sm">
+              <thead>
+                <tr>
+                  <th>Production</th>
+                  <th>Consumption</th>
+                  <th>Net production</th>
+                  <th>Windspeed</th>
+                  <th>Battery</th>
+                  <th>Blackout</th>
+                  <th>Market price</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td id="production"></td>
+                  <td id="consumption"></td>
+                  <td id="netProduction"></td>
+                  <td id="windspeed"></td>
+                  <td id="battery"></td>
+                  <td id="blackout"></td>
+                  <td id="marketPrice"></td>
+                  <td id="date"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="../../assets/js/vendor/popper.min.js"></script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+    <script>
+      feather.replace()
+    </script>
+
+<script>
+
+$("#customPriceForm").submit(function(event) {
+  event.preventDefault();
+
+  let customPrice = document.getElementById("customPrice").value; 
+
+  $.ajax({
+    url: "http://localhost:3000/api/setCustomPrice/" + customPrice,
+    type: "POST",
+    contentType: "plain/text",
+    success: function(status){
+      if (status == "success"){
+        console.log("customPrice changed successfully");
+      }
+      else{
+        if (status == "notManager"){
+          console.log("You are not a manager! wtf man! not cool");
+        }
+        else if (status = "invalidInput"){
+          console.log("invalid price value");
+        }
+        else{
+          $('#errorMessage').text("Error changing custom price"); 
+        }
+      }
+    },
+    error: function(status){
+      console.log("error: " + status);
+      $('#errorMessage').text("Problem logging in: " + status); 
+    }
+  });
+});
+
+function customPriceCheck(){
+  var checked = "unchecked";
+  if (document.getElementById("customPriceCheck").checked == true){
+    checked = "checked";
+  }
+  $.ajax({
+    url: "http://localhost:3000/api/useCustomPrice/" + checked,
+    type: "POST",
+    contentType: "plain/text",
+    success: function(status){
+      if (status == "success"){
+        console.log("customPrice enabled/disabled successfully");
+      }
+      else{
+        if (status == "notManager"){
+          console.log("You are not a manager! wtf man! not cool");
+        }
+        else{
+          $('#errorMessage').text("There was an error creating your prosumer"); 
+        }
+      }
+    },
+    error: function(status){
+      console.log("error: " + status);
+      $('#errorMessage').text("Problem logging in: " + status); 
+    }
+  });
+}
+
+function startPowerPlant(){
+  $.ajax({
+    url: "http://localhost:3000/api/startPowerplant/",
+    type: "POST",
+    contentType: "plain/text",
+    success: function(status){
+      if (status == "success"){
+        console.log("powerplant startup initiated");
+      }
+      else{
+        if (status == "notManager"){
+          console.log("You are not a manager! wtf man! not cool");
+        }
+        else{
+          $('#errorMessage').text("There was an error creating your prosumer"); 
+        }
+      }
+    },
+    error: function(status){
+      console.log("error: " + status);
+      $('#errorMessage').text("Problem logging in: " + status); 
+    }
+  });
+}
+
+function stopPowerPlant(){
+  $.ajax({
+    url: "http://localhost:3000/api/stopPowerplant/",
+    type: "POST",
+    contentType: "plain/text",
+    success: function(status){
+      if (status == "success"){
+        console.log("powerplant stopped");
+      }
+      else{
+        if (status == "notManager"){
+          console.log("You are not a manager! wtf man! not cool");
+        }
+        else{
+          $('#errorMessage').text("There was an error creating your prosumer"); 
+        }
+      }
+    },
+    error: function(status){
+      console.log("error: " + status);
+      $('#errorMessage').text("Problem logging in: " + status); 
+    }
+  });
+}
+
+
+</script>
+
+<script>
+  var date = 0;
+  setInterval(function(){
+    $.ajax({
+      url: "http://localhost:3000/api/getDashboardProsumer/",
+      type: "GET",
+      contentType: "plain/text",
+      success: function(status){
+        if (status == "loggedout")
+        {
+          console.log("logged out!");
+          let url = "signin.html";
+          window.location = url;
+        }
+        else{
+          console.log(status);
+          let prosumer = JSON.parse(status);
+
+          $('#modelPrice').text("Suggested price: " + prosumer[1].modelPrice);
+          if (prosumer[1].useCustomPrice == 1){
+            $('#currentPrice').text("Current price: " + prosumer[1].customPrice + " (custom price)");
+            document.getElementById("customPriceCheck").checked = true;
+          }
+          else{
+            $('#currentPrice').text("Current price: " + prosumer[1].modelPrice + " (automatic price)");
+            document.getElementById("customPriceCheck").checked = false;
+          }
+
+          $('#powerplantStatus').text("Status: " + prosumer[0].powerplantStatus);
+          $('#currentDemand').text("Current demand: " + prosumer[1].demand);
+          $('#currentSupply').text("Current supply: " + prosumer[1].supply);
+
+          
+
+          if (prosumer[0].date > date){
+            date = prosumer[0].date;
+            $('#production').text(prosumer[0].production); 
+            $('#consumption').text(prosumer[0].consumption); 
+            $('#windspeed').text(prosumer[0].wind); 
+            $('#battery').text(prosumer[0].battery + " / " + prosumer[0].batteryCapacity); 
+            $('#netProduction').text((prosumer[0].production - prosumer[0].consumption).toFixed(4)); 
+            $('#blackout').text(prosumer[0].blackout);
+            if (prosumer[1].useCustomPrice == 0){
+              $('#marketPrice').text(prosumer[1].modelPrice);
+            }
+            else{
+              $('#marketPrice').text(prosumer[1].customPrice);
+            }
+            var d = new Date(prosumer[0].date);
+            $('#date').text(d.getHours() + ":"+ d.getMinutes() + ":" + d.getSeconds() + " " + d.toDateString());
+          }
+        }
+      },
+      error: function(status){
+        $('#textBox').text("Error: " + status); 
+      }
+    });
+  }, 800);
+    </script>
+
+    <script>
+      function logout(){
+      $.ajax({
+      url: "http://localhost:3000/api/logout/",
+      type: "GET",
+      contentType: "plain/text",
+      success: function(status){
+        if (status == "success")
+        {
+          console.log("logout successful");
+          let url = "signin.html";
+          window.location = url;
+        }
+        else{
+          console.log("Couldnt log out: " + status);
+        }
+      },
+      error: function(status){
+        console.log("Couldnt log out!?");
+      }
+    });
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+</html>

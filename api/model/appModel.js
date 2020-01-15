@@ -184,6 +184,135 @@ Task.createProsumer = function (input, req, result) {
     }
 };
 
+Task.startPowerplant = function (req, result){
+    let id = req.session.userid;
+    sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+        if (err){
+            result(err, null);
+        }
+        else{
+            if (res[0].manager == 1){
+                sql.query("UPDATE prosumers SET powerplantStatus='starting' WHERE id = '" + id + "'", function (err, res) {  
+                    if (err){
+                        result(err, null);
+                    }
+                    else{
+                        result(null, "success");
+                        setTimeout(function () {
+                            sql.query("SELECT powerplantStatus FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+                                if (err){
+                                    console.log(err);
+                                }
+                                else{
+                                    if (res[0].powerplantStatus == "starting"){
+                                        sql.query("UPDATE prosumers SET powerplantStatus='running' WHERE id = '" + id + "'", function (err, res) {  
+                                            console.log("Powerplant running");
+                                        });
+                                    }
+                                }
+                            });
+                        }, 30000);
+                    }
+                });
+            }
+            else{
+                result(err, "notManager");
+            }
+        }
+    });
+}
+
+Task.stopPowerplant = function (req, result){
+    let id = req.session.userid;
+    sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+        if (err){
+            result(err, null);
+        }
+        else{
+            if (res[0].manager == 1){
+                sql.query("UPDATE prosumers SET powerplantStatus='stopped' WHERE id = '" + id + "'", function (err, res) {  
+                    if (err){
+                        result(err, null);
+                    }
+                    else{
+                        result(null, "success");
+                    }
+                });
+            }
+            else{
+                result(err, "notManager");
+            }
+        }
+    });
+}
+
+Task.useCustomPrice = function (input, req, result){
+    let id = req.session.userid;
+    sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+        if (err){
+            result(err, null);
+        }
+        else{
+            if (res[0].manager == 1){
+                if (input == "checked"){
+                    sql.query("UPDATE market SET useCustomPrice='1' ", function (err, res) {  
+                        if (err){
+                            result(err, null);
+                        }
+                        else{
+                            result(null, "success");
+                        }
+                    });
+                }
+                else if (input == "unchecked"){
+                    sql.query("UPDATE market SET useCustomPrice='0' ", function (err, res) {  
+                        if (err){
+                            console.log(err);
+                            result(err, null);
+                        }
+                        else{
+                            result(null, "success");
+                        }
+                    });
+                }
+            }
+            else{
+                result(err, "notManager");
+            }
+        }
+    });
+}
+
+Task.setCustomPrice = function (input, req, result){
+    let id = req.session.userid;
+    sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+        if (err){
+            result(err, null);
+        }
+        else{
+            if (res[0].manager == 1){
+                if (input < 0 || input > 9999.99){
+                    result(err, "invalidInput");
+                }
+
+                else {
+                    sql.query("UPDATE market SET customPrice='" + input + "' ", function (err, res) {  
+                        if (err){
+                            result(err, null);
+                        }
+                        else{
+                            result(null, "success");
+                        }
+                    });
+                }
+            }
+            else{
+                result(err, "notManager");
+            }
+        }
+    });
+}
+
 Task.uploadImage = function (req, result){
     if(req.file)
         console.log("req file found!");

@@ -1,28 +1,23 @@
---Prosumer--
+--Prosumer-- BASIC FUNCTIONALITY DONE
 -Create generic good looking errormessage box
-	Implement errorbox on all frontend pages
--Correct error handling for frontend houseSetup
+	Implement errorbox/successbox on all frontend pages
 -Upload picture in houseSetup
 	-Show picture somewhere on dashboard
 -Add updateHouse page
+-Add check in dashboard for if prosumer exists
 
 --Manager--
 -Update credentials and delete users accounts (not manager)
--See and control power plant production
--Set coal power plant start/running/stopped
--When producing, control ratio sent to buffer/market (when stopped buffer supplies market demand)
--See current market demand
--Alert if blackouts occur anywhere
--See model electiricy price
--Set current electricity price
--List of prosumer
+-*When producing, control ratio sent to buffer/market (when stopped buffer supplies market demand)
+-*Alert if blackouts occur anywhere
+-*List of prosumer
 	See who is logged in
 	See prosumers system
 	Block prosumers from buying from market
 
 --Simulator--
--Power plant functionality
--Ability to block prosumer from market
+-*Power plant functionality (turn off production when not running etc)
+-*Ability to block prosumer from market
 -Check what more to add
 
 --Frontend
@@ -30,3 +25,6 @@
 -Redirect from prosumer/manager page to other page if ex. manager is on prosumer site
 -Switch all api calls from "localhost" to file directory so it works online
 -Test the application online, watch for CORS errors
+
+
+CREATE TESTS!!!!

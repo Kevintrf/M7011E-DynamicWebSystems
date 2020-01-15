@@ -18,6 +18,18 @@ module.exports = function(app) {
   app.route('/api/registerUser/:query')
   .post(controller.registerUser);
 
+  app.route('/api/startPowerplant')
+  .post(controller.startPowerplant);
+
+  app.route('/api/useCustomPrice/:query')
+  .post(controller.useCustomPrice);
+
+  app.route('/api/setCustomPrice/:query')
+  .post(controller.setCustomPrice);
+
+  app.route('/api/stopPowerplant')
+  .post(controller.stopPowerplant);
+
   app.route('/api/uploadImage/')
   .post(controller.uploadImage);
 

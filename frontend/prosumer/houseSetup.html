@@ -83,6 +83,8 @@
             <h1 class="h2">House setup</h1>
           </div>
 
+          <span style="color:red;"><h2 id ="errorMessage"></h2></span>
+
           <form id="houseSetupForm">
               <div class="form-check">
                   <input class="form-check-input" type="checkbox" value="producerCheck" id="producerCheck" checked>
@@ -129,7 +131,7 @@
                 <input type="range" min="0" max="100" value="50" class="slider" id="missingMarket">
               </div>
               <br>
-              <button type="submit" class="btn btn-primary">Submit</button>
+              <button type="submit" class="btn btn-primary">Create</button>
               <br><br>
               <br><br>
               
@@ -198,11 +200,15 @@
           success: function(status){
             if (status == "success"){
               console.log("prosumer created successfully");
+              $('#errorMessage').text("User created successfully"); 
             }
             else{
-              console.log("exists");
-              console.log("user already has a prosumer");
-              $('#errorMessage').text("Incorrect username or password"); 
+              if (status == "alreadyExists"){
+                $('#errorMessage').text("There is already a user associated with your account"); 
+              }
+              else{
+                $('#errorMessage').text("There was an error creating your prosumer"); 
+              }
             }
           },
           error: function(status){

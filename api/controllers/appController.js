@@ -20,8 +20,44 @@ exports.getDashboardProsumer = function(req, res){
   });
 };
 
+exports.startPowerplant = function(req, res){
+  Task.startPowerplant(req, function(err, result) {
+    if (err)
+      res.send(err);
+
+    res.send(result);
+  });
+};
+
+exports.stopPowerplant = function(req, res){
+  Task.stopPowerplant(req, function(err, result) {
+    if (err)
+      res.send(err);
+
+    res.send(result);
+  });
+};
+
 exports.getProsumerInfo = function(req, res){
   Task.getProsumerInfo(req.params.query, function(err, result) {
+    if (err)
+      res.send(err);
+
+    res.send(result);
+  });
+};
+
+exports.useCustomPrice = function(req, res){
+  Task.useCustomPrice(req.params.query, req, function(err, result) {
+    if (err)
+      res.send(err);
+
+    res.send(result);
+  });
+};
+
+exports.setCustomPrice = function(req, res){
+  Task.setCustomPrice(req.params.query, req, function(err, result) {
     if (err)
       res.send(err);
 

@@ -32,4 +32,4 @@
 |2020-01-12|4|Frontend|
 |2020-01-13|5|Frontend work|
 |2020-01-14|5|Frontend, work on file upload|
-|2020-01-15|6|Frontend work, small changes in db and simulator|
+|2020-01-15|10|Frontend work, simulator, db|
