@@ -27,6 +27,42 @@ Task.logout = function (req, result){
     result(null, "success");
 }
 
+Task.deleteUser = function(input, req, result){
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
+            }
+            else{
+                if (res[0].manager == 1){
+                    sql.query("DELETE FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+                        if (err){
+                            result(err, null);
+                        }
+                        else{
+                            sql.query("DELETE FROM users WHERE id = '" + id + "'", function (err, res) {  
+                                if (err){
+                                    result(err, null);
+                                }
+                                else{
+                                    result(null, "success");
+                                }
+                            });
+                        }
+                    });
+                }
+                else{
+                    result(err, "notManager");
+                }
+            }
+        });
+    }
+    else{
+        result(null, "loggedout");
+    }
+}
+
 Task.getDashboardProsumer = function (req, result) {
     //Check for if the userid actually has a prosumer set up
     if (req.session.userid){

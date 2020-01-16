@@ -14,27 +14,18 @@ async function updateProsumersFromDatabase(){
     try {
         await db.sendToDatabase("SELECT * FROM prosumers;", async function(data){
             var prosumerList = data;
-            var manager;
             var marketSupply = 0;
             var marketDemand = 0;
-
-            //(demand/supply)*value
-
-            prosumerList.forEach(function(item, index) {
-                if (prosumerList[index].manager == true){
-                    manager = index;
-                }
-            });
-
-            if (manager == undefined){
-                //NÅGOT HAR GÅTT HELT FEL, HJÄLP
-            }
 
             prosumerList.forEach(function(item, index) {
                 generatePower(index, prosumerList, market);
             });
 
             prosumerList.forEach(function(item, index) {
+                if (prosumerList[index].manager == 1 && prosumerList[index].powerplantStatus != "running"){
+                    marketSupply += prosumerList[index].battery;
+                }
+
                 if (prosumerList[index].power > 0){
                     marketSupply += prosumerList[index].power;
                 }
@@ -42,15 +33,33 @@ async function updateProsumersFromDatabase(){
                 else if (prosumerList[index].power < 0){
                     marketDemand += (prosumerList[index].power * -1);
                 }
+            });
+
+            if (marketSupply == 0 || marketDemand == 0){
+                marketPrice = null;
+            }
+            else{
                 marketPrice = (marketDemand/marketSupply)*marketPriceMultiplier;
+            }
+
+            prosumerList.forEach(function(item, index) {
+                handleExcessPower(index, prosumerList);
             });
 
             prosumerList.forEach(function(item, index) {
-                handleExcessPower(index, prosumerList, manager);
+                handleMissingPower(index, prosumerList);
             });
 
             prosumerList.forEach(function(item, index) {
-                handleMissingPower(index, prosumerList, manager);
+                if (prosumerList[index].manager == 1){
+                    if (market > 0){
+                        console.log("Adding excess market power to manager battery")
+                        prosumerList[index].battery += market;
+                        if (prosumerList[index].battery > prosumerList[index].batteryCapacity){
+                            prosumerList[index].battery = prosumerList[index].batteryCapacity;
+                        }
+                    }
+                }
             });
 
             prosumerList.forEach(function(item, index) {
@@ -92,11 +101,19 @@ function updateDatabaseProsumerEntry(index, prosumerList, marketPrice, marketSup
 
     //Uppdaterar ALLA möjliga entries i market
     try{
-        db.sendToDatabase("UPDATE market SET demand =" + marketDemand + 
+        if (marketPrice == null){
+            db.sendToDatabase("UPDATE market SET demand =" + marketDemand + 
+        ", supply=" + marketSupply, function(data){
+            console.log("Database entry updated for market " + index);
+        });
+        }
+        else{
+            db.sendToDatabase("UPDATE market SET demand =" + marketDemand + 
         ", supply=" + marketSupply + 
         ", modelPrice=" + marketPrice, function(data){
             console.log("Database entry updated for market " + index);
         });
+        }
     }
 
     catch (e){
@@ -104,7 +121,7 @@ function updateDatabaseProsumerEntry(index, prosumerList, marketPrice, marketSup
     }
 }
 
-function currrentConsumption(){
+function currentConsumption(){
     //Returns hourly usage of 
     var normal = createDist();
 
@@ -145,25 +162,54 @@ function currentMarketPrice(){
 
 //Funkar
 function generatePower(index, prosumerList){
-    //const windSpeed = await parseFloat(await currentWindSpeed());
-    //onst consumption = await parseFloat(await currrentConsumption());
-    //const power = await parseFloat((await windSpeed * 0.2) - await consumption);
-    let windspeed = currentWindSpeed();
-    let production = parseFloat(windspeed * 0.2);
-    console.log("prod " + production);
-    let consumption = currrentConsumption();
-    console.log("cons " + consumption);
-    let power = production - consumption;
-    console.log("power "+ power);
-    //let power = await parseFloat((await currentWindSpeed() * 0.2) - await currrentConsumption());
+    if (prosumerList[index].manager == 0 && prosumerList[index].producer == 1){
+        let windspeed = currentWindSpeed();
+        let production = parseFloat(windspeed * 0.2);
+        let consumption = currentConsumption();
+        let power = production - consumption;
 
-    prosumerList[index].wind = windspeed;
-    prosumerList[index].production = production;
-    prosumerList[index].consumption = consumption;
-    prosumerList[index].power = power;
-    console.log("User " + index + " production has been set to " + production);
-    console.log("User " + index + " consumption has been set to " + consumption);
-    console.log("User " + index + " power has been set to " + power);
+        prosumerList[index].wind = windspeed;
+        prosumerList[index].production = production;
+        prosumerList[index].consumption = consumption;
+        prosumerList[index].power = power;
+        console.log("User " + index + " production has been set to " + production);
+        console.log("User " + index + " consumption has been set to " + consumption);
+        console.log("User " + index + " power has been set to " + power);
+    }
+    else if (prosumerList[index].manager == 1){
+        if (prosumerList[index].powerplantStatus == "running"){
+            let windspeed = 0;
+            let production = 5;
+            let consumption = currentConsumption();
+            let power = production - consumption;
+
+            prosumerList[index].wind = windspeed;
+            prosumerList[index].production = production;
+            prosumerList[index].consumption = consumption;
+            prosumerList[index].power = power;
+            console.log("User " + index + " production has been set to " + production);
+            console.log("User " + index + " consumption has been set to " + consumption);
+            console.log("User " + index + " power has been set to " + power);
+        }
+        else{
+            let windspeed = 0;
+            let production = 0;
+            let consumption = currentConsumption();
+            let power = production - consumption;
+
+            prosumerList[index].wind = windspeed;
+            prosumerList[index].production = production;
+            prosumerList[index].consumption = consumption;
+            prosumerList[index].power = power;
+            console.log("User " + index + " production has been set to " + production);
+            console.log("User " + index + " consumption has been set to " + consumption);
+            console.log("User " + index + " power has been set to " + power);
+            console.log("No power generated (powerplant not running)");
+        }
+    }
+    else{
+        console.log("No power generated (is not a producer)");
+    }
 }
 
 function handleExcessPower(index, prosumerList, manager){
@@ -203,6 +249,24 @@ function handleExcessPower(index, prosumerList, manager){
         console.log("User " + index + " sent " + excessPowerMarket + " power to market (DOES NOTHING NOW, FIX LATER)");
 
         prosumerList[index].power = 0;
+    }
+
+    if (prosumerList[index].manager == 1 && prosumerList[index].powerplantStatus != "running"){
+        if (prosumerList[index].power < 0 && prosumerList[index].battery > 0){
+            if (prosumerList[index].battery > (prosumerList[index].power*-1)){
+                prosumerList[index].battery = prosumerList[index].battery - (prosumerList[index].power*-1);
+                prosumerList[index].power = 0;
+            }
+            else{
+                prosumerList[index].power += prosumerList[index].battery;
+                prosumerList[index].battery = 0;
+            }
+            console.log("Manager used its battery to power itself");
+        }
+
+
+        market += prosumerList[index].battery;
+        prosumerList[index].battery = 0;
     }
 }
 

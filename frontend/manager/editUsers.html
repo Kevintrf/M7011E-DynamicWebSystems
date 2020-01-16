@@ -15,7 +15,7 @@
     <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="houseSetup.css" rel="stylesheet">
+    <link href="editUsers.css" rel="stylesheet">
   </head>
 
   <body>
@@ -105,7 +105,7 @@
               </div>
               <br>
               <button type="submit" class="btn btn-primary">Submit changes</button>
-              <button type="button" class="btn btn-danger">Delete user</button>
+              <button type="button" class="btn btn-danger" onclick="deleteUser();">Delete user</button>
               <br><br>
               <br><br>
               
@@ -126,6 +126,36 @@
     <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
     <script>
       feather.replace()
+    </script>
+
+    <script>
+    function deleteUser(){
+      console.log("deleteuser");
+      var deleteId = 1; //Test
+      $.ajax({
+          url: "http://localhost:3000/api/deleteUser/" + deleteId,
+          type: "POST",
+          contentType: "plain/text",
+          success: function(status){
+            if (status == "loggedout"){
+              console.log("logged out!");
+              let url = "../signin.html";
+              window.location = url;
+            }
+            if (status == "success"){
+              console.log("success");
+            }
+            else{
+              console.log(status);
+              $('#errorMessage').text("Problem deleting user: " + status); 
+            }
+          },
+          error: function(status){
+            console.log("error: " + status);
+            $('#errorMessage').text("Problem deleting user: " + status);
+          }
+        });
+    }
     </script>
 
     <script>
@@ -288,31 +318,6 @@
       missingBatterySlider.value = batterySliderValue;
       missingBatteryOutput.innerHTML = "From market: " + batterySliderValue + "%";
     }
-    </script>
-
-<script>
-  var date = 0;
-  setInterval(function(){
-    $.ajax({
-      url: "http://localhost:3000/api/getMyProsumer/",
-      type: "GET",
-      contentType: "plain/text",
-      success: function(status){
-        if (status == "loggedout")
-        {
-          console.log("logged out!");
-          let url = "../signin.html";
-          window.location = url;
-        }
-        else{
-
-        }
-      },
-      error: function(status){
-        $('#textBox').text("Error: " + status); 
-      }
-    });
-  }, 1000);
     </script>
 
     <script>

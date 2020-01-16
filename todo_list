@@ -7,7 +7,7 @@
 -Add check in dashboard for if prosumer exists
 
 --Manager--
--Update credentials and delete users accounts (not manager)
+-Update credentials and delete users accounts (not managers)
 -*When producing, control ratio sent to buffer/market (when stopped buffer supplies market demand)
 -*List of prosumer
 	See who is logged in
@@ -15,9 +15,7 @@
 	Block prosumers from buying from market
 
 --Simulator--
--*Power plant functionality (turn off production when not running etc)
 -*Ability to block prosumer from market
--Check what more to add
 
 --Frontend
 -Direct to prosumer/manager page after login
