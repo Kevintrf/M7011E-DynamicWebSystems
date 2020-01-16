@@ -27,6 +27,9 @@ module.exports = function(app) {
   app.route('/api/setCustomPrice/:query')
   .post(controller.setCustomPrice);
 
+  app.route('/api/getBlackoutUsers')
+  .get(controller.getBlackoutUsers);
+
   app.route('/api/stopPowerplant')
   .post(controller.stopPowerplant);
 

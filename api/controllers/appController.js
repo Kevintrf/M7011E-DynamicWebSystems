@@ -65,6 +65,15 @@ exports.setCustomPrice = function(req, res){
   });
 };
 
+exports.getBlackoutUsers = function(req, res){
+  Task.getBlackoutUsers(req.params.query, req, function(err, result) {
+    if (err)
+      res.send(err);
+
+    res.send(result);
+  });
+};
+
 exports.registerUser = function(req, res){
   Task.registerUser(req.params.query, function(err, result) {
     if (err)

@@ -105,6 +105,9 @@
             </h4>
           </div>
 
+          <h2>Blackout</h2>
+          <p id="blackoutStatus"></p>
+
           <h2>Powerplant production</h2>
           <div class="table-responsive">
             <table class="table table-striped table-sm">
@@ -279,7 +282,7 @@ function stopPowerPlant(){
         if (status == "loggedout")
         {
           console.log("logged out!");
-          let url = "signin.html";
+          let url = "../signin.html";
           window.location = url;
         }
         else{
@@ -325,6 +328,38 @@ function stopPowerPlant(){
         $('#textBox').text("Error: " + status); 
       }
     });
+
+    $.ajax({
+      url: "http://localhost:3000/api/getBlackoutUsers/",
+      type: "GET",
+      contentType: "plain/text",
+      success: function(status){
+        if (status == "notManager")
+        {
+          console.log(status);
+        }
+        else if (status == "noBlackouts"){
+          console.log("no blackouts!");
+          $('#blackoutStatus').text("There are currently no blackouts in the system");
+        }
+        else{
+          let blackoutUsers = JSON.parse(status);
+          var blackoutStatusText = "Blackout for users: ";
+          for (var i = 0; i < blackoutUsers.length; i++){
+            if (i == 0){
+              blackoutStatusText += blackoutUsers[i].username;
+            }
+            else{
+              blackoutStatusText += ", " + blackoutUsers[i].username;
+            }
+          }
+          $('#blackoutStatus').text(blackoutStatusText);
+        }
+      },
+      error: function(status){
+        console.log("Error");
+      }
+    });
   }, 800);
     </script>
 
@@ -338,7 +373,7 @@ function stopPowerPlant(){
         if (status == "success")
         {
           console.log("logout successful");
-          let url = "signin.html";
+          let url = "../signin.html";
           window.location = url;
         }
         else{

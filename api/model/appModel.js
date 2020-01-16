@@ -44,7 +44,6 @@ Task.getDashboardProsumer = function (req, result) {
                         //let prosumer = JSON.stringify(res);
 
                         let newArray = res.concat(res2);
-                        console.log(JSON.stringify(newArray));
                         result(null, JSON.stringify(newArray));
                     }
                 });
@@ -185,132 +184,204 @@ Task.createProsumer = function (input, req, result) {
 };
 
 Task.startPowerplant = function (req, result){
-    let id = req.session.userid;
-    sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
-        if (err){
-            result(err, null);
-        }
-        else{
-            if (res[0].manager == 1){
-                sql.query("UPDATE prosumers SET powerplantStatus='starting' WHERE id = '" + id + "'", function (err, res) {  
-                    if (err){
-                        result(err, null);
-                    }
-                    else{
-                        result(null, "success");
-                        setTimeout(function () {
-                            sql.query("SELECT powerplantStatus FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
-                                if (err){
-                                    console.log(err);
-                                }
-                                else{
-                                    if (res[0].powerplantStatus == "starting"){
-                                        sql.query("UPDATE prosumers SET powerplantStatus='running' WHERE id = '" + id + "'", function (err, res) {  
-                                            console.log("Powerplant running");
-                                        });
-                                    }
-                                }
-                            });
-                        }, 30000);
-                    }
-                });
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
             }
             else{
-                result(err, "notManager");
+                if (res[0].manager == 1){
+                    sql.query("UPDATE prosumers SET powerplantStatus='starting' WHERE id = '" + id + "'", function (err, res) {  
+                        if (err){
+                            result(err, null);
+                        }
+                        else{
+                            result(null, "success");
+                            setTimeout(function () {
+                                sql.query("SELECT powerplantStatus FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+                                    if (err){
+                                        console.log(err);
+                                    }
+                                    else{
+                                        if (res[0].powerplantStatus == "starting"){
+                                            sql.query("UPDATE prosumers SET powerplantStatus='running' WHERE id = '" + id + "'", function (err, res) {  
+                                                console.log("Powerplant running");
+                                            });
+                                        }
+                                    }
+                                });
+                            }, 30000);
+                        }
+                    });
+                }
+                else{
+                    result(err, "notManager");
+                }
             }
-        }
-    });
+        });
+    }
+    else{
+        result(null, "loggedout");
+    }
 }
 
 Task.stopPowerplant = function (req, result){
-    let id = req.session.userid;
-    sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
-        if (err){
-            result(err, null);
-        }
-        else{
-            if (res[0].manager == 1){
-                sql.query("UPDATE prosumers SET powerplantStatus='stopped' WHERE id = '" + id + "'", function (err, res) {  
-                    if (err){
-                        result(err, null);
-                    }
-                    else{
-                        result(null, "success");
-                    }
-                });
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
             }
             else{
-                result(err, "notManager");
+                if (res[0].manager == 1){
+                    sql.query("UPDATE prosumers SET powerplantStatus='stopped' WHERE id = '" + id + "'", function (err, res) {  
+                        if (err){
+                            result(err, null);
+                        }
+                        else{
+                            result(null, "success");
+                        }
+                    });
+                }
+                else{
+                    result(err, "notManager");
+                }
             }
-        }
-    });
+        });
+    }
+    else{
+        result(null, "loggedout");
+    }
 }
 
 Task.useCustomPrice = function (input, req, result){
-    let id = req.session.userid;
-    sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
-        if (err){
-            result(err, null);
-        }
-        else{
-            if (res[0].manager == 1){
-                if (input == "checked"){
-                    sql.query("UPDATE market SET useCustomPrice='1' ", function (err, res) {  
-                        if (err){
-                            result(err, null);
-                        }
-                        else{
-                            result(null, "success");
-                        }
-                    });
-                }
-                else if (input == "unchecked"){
-                    sql.query("UPDATE market SET useCustomPrice='0' ", function (err, res) {  
-                        if (err){
-                            console.log(err);
-                            result(err, null);
-                        }
-                        else{
-                            result(null, "success");
-                        }
-                    });
-                }
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
             }
             else{
-                result(err, "notManager");
+                if (res[0].manager == 1){
+                    if (input == "checked"){
+                        sql.query("UPDATE market SET useCustomPrice='1' ", function (err, res) {  
+                            if (err){
+                                result(err, null);
+                            }
+                            else{
+                                result(null, "success");
+                            }
+                        });
+                    }
+                    else if (input == "unchecked"){
+                        sql.query("UPDATE market SET useCustomPrice='0' ", function (err, res) {  
+                            if (err){
+                                console.log(err);
+                                result(err, null);
+                            }
+                            else{
+                                result(null, "success");
+                            }
+                        });
+                    }
+                }
+                else{
+                    result(err, "notManager");
+                }
             }
-        }
-    });
+        });
+    }
+    else{
+        result(null, "loggedout");
+    }
 }
 
 Task.setCustomPrice = function (input, req, result){
-    let id = req.session.userid;
-    sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
-        if (err){
-            result(err, null);
-        }
-        else{
-            if (res[0].manager == 1){
-                if (input < 0 || input > 9999.99){
-                    result(err, "invalidInput");
-                }
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
+            }
+            else{
+                if (res[0].manager == 1){
+                    if (input < 0 || input > 9999.99){
+                        result(err, "invalidInput");
+                    }
 
-                else {
-                    sql.query("UPDATE market SET customPrice='" + input + "' ", function (err, res) {  
+                    else {
+                        sql.query("UPDATE market SET customPrice='" + input + "' ", function (err, res) {  
+                            if (err){
+                                result(err, null);
+                            }
+                            else{
+                                result(null, "success");
+                            }
+                        });
+                    }
+                }
+                else{
+                    result(err, "notManager");
+                }
+            }
+        });
+    }
+    else{
+        result(null, "loggedout");
+    }
+}
+
+Task.getBlackoutUsers = function (input, req, result){
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
+            }
+            else{
+                if (res[0].manager == 1){
+                    sql.query("SELECT id FROM prosumers WHERE blackout='1' ", function (err, res2) {  
                         if (err){
                             result(err, null);
                         }
+                        else if (res2.length < 1){
+                            result(err, "noBlackouts");
+                        }
                         else{
-                            result(null, "success");
+                            var blackouts = [];
+
+                            console.log(res2.length);
+
+                            for(var i = 0; i < res2.length; i++){
+                                if (i == 0){
+                                    blackouts += "'" + res2[i].id + "'";
+                                }
+                                else{
+                                    blackouts += ", '" + res2[i].id + "'";
+                                }
+                            }
+
+                            sql.query("SELECT username FROM users WHERE id IN (" + blackouts + ") ", function (err, res3) { 
+                                if (err){
+                                    result(err, null);
+                                }
+                                else{
+                                    result(err, JSON.stringify(res3));
+                                }
+                            });
                         }
                     });
                 }
+                else{
+                    result(err, "notManager");
+                }
             }
-            else{
-                result(err, "notManager");
-            }
-        }
-    });
+        });
+    }
+    else{
+        result(null, "loggedout");
+    }
 }
 
 Task.uploadImage = function (req, result){

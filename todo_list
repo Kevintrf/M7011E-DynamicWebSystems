@@ -9,7 +9,6 @@
 --Manager--
 -Update credentials and delete users accounts (not manager)
 -*When producing, control ratio sent to buffer/market (when stopped buffer supplies market demand)
--*Alert if blackouts occur anywhere
 -*List of prosumer
 	See who is logged in
 	See prosumers system
