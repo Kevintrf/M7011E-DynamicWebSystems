@@ -59,7 +59,12 @@
     type: "POST",
     contentType: "plain/text",
     success: function(status){
-      if (status == "correct"){
+      if (status == "manager"){
+        //<a href="../thefile.html">my link</a> parent folder
+        let url = "manager/dashboard.html";
+        window.location = url;
+      }
+      else if (status == "user"){
         //<a href="../thefile.html">my link</a> parent folder
         let url = "prosumer/dashboard.html";
         window.location = url;

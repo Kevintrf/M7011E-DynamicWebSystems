@@ -7,12 +7,10 @@
 -Add check in dashboard for if prosumer exists
 
 --Manager--
--*When producing, control ratio sent to buffer/market (when stopped buffer supplies market demand)
--*List of prosumer
-	See who is logged in
-	See prosumers system
-	Block prosumers from selling to market
-*Single page where you for a single user can see production values, block prosumer from selling
+-Setup screen for creating initial powerplant like houseSetup
+-Screen to change values (almost like houseSetup)
+-When producing, control ratio sent to buffer/market (when stopped buffer supplies market demand)
+-See who is logged in
 
 --API
 *Look for isNotManager in users and not prosumers (where applicable, for example pages you can reach and use before creating your powerplant)
@@ -21,12 +19,12 @@
 Everything should be done, doublecheck later!
 
 --Frontend
--Direct to prosumer/manager page after login
 -Redirect from prosumer/manager page to other page if ex. manager is on prosumer site
 -Switch all api calls from "localhost" to file directory so it works online
 -Test the application online, watch for CORS errors
--Fix sidebuttons to lead to correct links
+-Fix sidebuttons to lead to correct links (done on prosumer side)
 -After deleting/changing username on a user in editUsers the select list needs to be cleared before it is updated
+-Weird error comes up after blocking user in chrome dev tools, it still works tho
 
 
 CREATE TESTS!!!!

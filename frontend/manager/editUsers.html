@@ -30,48 +30,36 @@
 
     <div class="container-fluid">
       <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-          <div class="sidebar-sticky">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link active" href="#">
-                  <span data-feather="home"></span>
-                  Dashboard <span class="sr-only">(current)</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="file"></span>
-                  Orders
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="shopping-cart"></span>
-                  Products
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="users"></span>
-                  Customers
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="bar-chart-2"></span>
-                  Reports
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="layers"></span>
-                  Integrations
-                </a>
-              </li>
-            </ul>
-          </div>
-        </nav>  
+          <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+              <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                  <li class="nav-item">
+                    <a class="nav-link" href="dashboard.html">
+                      <span data-feather="home"></span>
+                      Dashboard
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="powerplantSettings.html">
+                      <span data-feather="settings"></span>
+                      Powerplant settings
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="viewUsers.html">
+                      <span data-feather="users"></span>
+                      View users
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link active" href="editUsers.html">
+                      <span data-feather="settings"></span>
+                      Edit users
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </nav>
 
         <!--  how to use the forms
           https://getbootstrap.com/docs/4.0/components/forms/
@@ -174,6 +162,11 @@
       updateUsers();
       function updateUsers(){
     var select = document.getElementById("userSelect");
+
+    for(var i = select.options.length - 1 ; i >= 0 ; i--)
+    {
+        select.remove(i);
+    }
 
 
         $.ajax({

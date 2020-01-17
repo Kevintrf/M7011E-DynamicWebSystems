@@ -179,6 +179,17 @@ exports.updateCredentials = function(req, res) {
   });
 };
 
+exports.blockFromMarket = function(req, res) {
+  Task.blockFromMarket(req.params.query, req, function(err, result) {
+    if (err){
+      res.send(err);
+    }
+    else{
+      res.send(result);
+    }
+  });
+};
+
 exports.getAllNormalUsers = function(req, res) {
   Task.getAllNormalUsers(req, function(err, result) {
     if (err){
@@ -191,7 +202,7 @@ exports.getAllNormalUsers = function(req, res) {
 };
 
 exports.getProsumerById = function(req, res) {
-  Task.getProsumerById(req.params.query, function(err, result) {
+  Task.getProsumerById(req.params.query, req, function(err, result) {
     if (err){
       res.send(err);
     }

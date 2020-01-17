@@ -149,9 +149,14 @@ Task.login = function (input, req, result) {
                     }
                     else{
                         if (resultCompare == true){
-                            console.log("Correct password");
                             req.session.userid = res[0].id;
-                            result(null, "correct");
+                            console.log("Correct password");
+                            if (res[0].manager == "1"){
+                                result(null, "manager");
+                            }
+                            else{
+                                result(null, "user");
+                            }
                         }
                         else{
                             console.log("Incorrect password");
@@ -515,16 +520,67 @@ Task.uploadImage = function (req, result){
     result(null, "default");
 }
 
-Task.getProsumerById = function (id, result) {
-    sql.query("SELECT * FROM prosumers WHERE id = ? ", id, function (err, res) {             
-        if(err) {
-            console.log("error: ", err);
-            result(err, null);
-        }
-        else{
-            result(null, res);
-        }
-    });   
+Task.blockFromMarket = function (input, req, result){
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
+            }
+            else{
+                if (res[0].manager == 1){
+                    let inputValues = JSON.parse(input);
+
+                    var currentTime = Date.now();
+                    var blockUntil = currentTime + (inputValues.duration*1000);
+                    //set blockvalue to currentime+input.time where id = input.id
+                    sql.query("UPDATE prosumers SET marketBlockUntil='" + blockUntil + "' WHERE id = '" + inputValues.id + "'", function (err, res) {  
+                        if (err){
+                            result(err, null);
+                        }
+                        else{
+                            result(err, "success");
+                        }
+                    });
+                }
+                else{
+                    result(err, "notManager");
+                }
+            }
+        });
+    }
+    else{
+        result(null, "loggedout");
+    }
+}
+
+Task.getProsumerById = function (input, req, result) {
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
+            }
+            else{
+                if (res[0].manager == 1){
+                    sql.query("SELECT * FROM prosumers WHERE id = '" + input + "'", function (err, res2) {  
+                        if (err){
+                            result(err, null);
+                        }
+                        else{
+                            result(null, JSON.stringify(res2));
+                        }
+                    });
+                }
+                else{
+                    result(err, "notManager");
+                }
+            }
+        });
+    }
+    else{
+        result(null, "loggedout");
+    }  
 };
 
 Task.getAllNormalUsers = function (req, result){

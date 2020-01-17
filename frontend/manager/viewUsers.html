@@ -9,13 +9,13 @@
     <meta name="author" content="">
     <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
-    <title>Dashboard</title>
+    <title>View users</title>
 
     <!-- Bootstrap core CSS -->
     <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="dashboard.css" rel="stylesheet">
+    <link href="editUsers.css" rel="stylesheet">
   </head>
 
   <body>
@@ -30,56 +30,70 @@
 
     <div class="container-fluid">
       <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-          <div class="sidebar-sticky">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link active" href="#">
-                  <span data-feather="home"></span>
-                  Dashboard <span class="sr-only">(current)</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="file"></span>
-                  Orders
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="shopping-cart"></span>
-                  Products
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="users"></span>
-                  Customers
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="bar-chart-2"></span>
-                  Reports
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="layers"></span>
-                  Integrations
-                </a>
-              </li>
-            </ul>
-          </div>
-        </nav>
+          <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+              <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                  <li class="nav-item">
+                    <a class="nav-link" href="dashboard.html">
+                      <span data-feather="home"></span>
+                      Dashboard
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="powerplantSettings.html">
+                      <span data-feather="settings"></span>
+                      Powerplant settings
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link active" href="viewUsers.html">
+                      <span data-feather="users"></span>
+                      View users
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="editUsers.html">
+                      <span data-feather="settings"></span>
+                      Edit users
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+
+        <!--  how to use the forms
+          https://getbootstrap.com/docs/4.0/components/forms/
+
+        -->
 
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="h2">Dashboard</h1>
+            <h1 class="h2">View users</h1>
           </div>
-          <p id="userList">hej</p>
 
-          
+          <div class="form-group">
+            <label for="userSelect">Select user:</label>
+            <select class="form-control" id="userSelect">
+
+            </select>
+          </div>
+
+          <h3>Prosumer production stats</h3>
+          <p id="production"></p>
+          <p id="consumption"></p>
+          <p id="windspeed"></p>
+          <p id="battery"></p>
+          <p id="netProduction"></p>
+          <p id="blackout"></p>
+
+          <form id="marketBlock">
+          <div class="form-group">
+            <h3>Block from selling to market</h3>
+            <input type="number" class="form-control" id="blockTime" placeholder="10 seconds" step="1" min="10" max="100" required>
+            <small id="customPriceHelp" class="form-text text-muted">This will block the user from selling to the market for the specified amount of time</small>
+              <button type="submit" class="btn btn-danger">Block user</button>
+              </div>
+          </form>
         </main>
       </div>
     </div>
@@ -98,8 +112,149 @@
       feather.replace()
     </script>
 
-<script>
+    <script>
+    $("#marketBlock").submit(function(event) {
+      event.preventDefault();
+      console.log("marketblock");
+      let blockInput = {};
+      var e = document.getElementById("userSelect");
+      //e.options[e.selectedIndex].value;
+      blockInput.duration = document.getElementById("blockTime").value;
+      blockInput.id = e.options[e.selectedIndex].value;;
+
+
+
+      $.ajax({
+      url: "http://localhost:3000/api/blockFromMarket/" + JSON.stringify(blockInput),
+      type: "POST",
+      contentType: "plain/text",
+      success: function(status){
+        if (status == "loggedout")
+        {
+          console.log("logged out!");
+          let url = "../signin.html";
+          window.location = url;
+        }
+        else if (status == "notManager")
+        {
+          console.log("not manager!");
+          let url = "../signin.html";
+          window.location = url;
+        }
+        else{
+          console.log(status);
+          let prosumer = JSON.parse(status);
+          $('#production').text("Production: " + prosumer[0].production); 
+          $('#consumption').text("Consumption: " + prosumer[0].consumption); 
+          $('#windspeed').text("Windspeed: " + prosumer[0].wind); 
+          $('#battery').text("Battery: " + prosumer[0].battery + " / " + prosumer[0].batteryCapacity); 
+          $('#netProduction').text("Net production: " + (prosumer[0].production - prosumer[0].consumption).toFixed(4)); 
+          $('#blackout').text("Blackout: " + prosumer[0].blackout);
+        }
+      },
+      error: function(status){
+        $('#textBox').text("Error: " + status); 
+      }
+    });
+    });
+
+      setInterval(function(){
+
+        var e = document.getElementById("userSelect");
+
+      if (e.options[e.selectedIndex] != undefined){
+        let prosumerId = e.options[e.selectedIndex].value;
+
     $.ajax({
+      url: "http://localhost:3000/api/getProsumerById/" + prosumerId,
+      type: "GET",
+      contentType: "plain/text",
+      success: function(status){
+        if (status == "loggedout")
+        {
+          console.log("logged out!");
+          let url = "../signin.html";
+          window.location = url;
+        }
+        else if (status == "notManager")
+        {
+          console.log("not manager!");
+          let url = "../signin.html";
+          window.location = url;
+        }
+        else{
+          console.log(status);
+          let prosumer = JSON.parse(status);
+            $('#production').text("Production: " + prosumer[0].production); 
+            $('#consumption').text("Consumption: " + prosumer[0].consumption); 
+            $('#windspeed').text("Windspeed: " + prosumer[0].wind); 
+            $('#battery').text("Battery: " + prosumer[0].battery + " / " + prosumer[0].batteryCapacity); 
+            $('#netProduction').text("Net production: " + (prosumer[0].production - prosumer[0].consumption).toFixed(4)); 
+            $('#blackout').text("Blackout: " + prosumer[0].blackout);
+        }
+      },
+      error: function(status){
+        $('#textBox').text("Error: " + status); 
+      }
+    });
+  }
+  }, 800);
+    </script>
+
+    <script>
+    function deleteUser(){
+      console.log("deleteuser");
+      console.log()
+      var e = document.getElementById("userSelect");
+
+      if (e.options[e.selectedIndex] == undefined){
+        console.log("nothing selected");
+        //return error
+      }
+
+      else{
+        var deleteId = e.options[e.selectedIndex].value;
+        $.ajax({
+          url: "http://localhost:3000/api/deleteUser/" + deleteId,
+          type: "POST",
+          contentType: "plain/text",
+          success: function(status){
+            if (status == "loggedout"){
+              console.log("logged out!");
+              let url = "../signin.html";
+              window.location = url;
+            }
+            if (status == "success"){
+              console.log("success");
+              updateUsers();
+            }
+            else{
+              console.log(status);
+              $('#errorMessage').text("Problem deleting user: " + status); 
+            }
+          },
+          error: function(status){
+            console.log("error: " + status);
+            $('#errorMessage').text("Problem deleting user: " + status);
+          }
+        });
+      }
+
+    }
+    </script>
+
+    <script>
+      updateUsers();
+      function updateUsers(){
+    var select = document.getElementById("userSelect");
+
+    for(var i = select.options.length - 1 ; i >= 0 ; i--)
+    {
+        select.remove(i);
+    }
+
+
+        $.ajax({
       url: "http://localhost:3000/api/getAllNormalUsers/",
       type: "GET",
       contentType: "plain/text",
@@ -119,12 +274,10 @@
           console.log("amount of users " + users.length);
           var usersString = "";
           for (var i = 0; i < users.length; i++){
-            if (i == 0){
-              usersString += users[i].username;
-            }
-            else{
-              usersString += " NEWLINE " + users[i].username;
-            }
+            var option = document.createElement("option");
+            option.value = users[i].id;
+            option.text = users[i].username;
+            select.add(option);
           }
           console.log(usersString);
           $('#userList').text(usersString); 
@@ -135,7 +288,139 @@
       }
       
     });
+  }
     </script>
+
+    <script>
+
+      $("#editUserForm").submit(function(event) {
+        event.preventDefault();
+        var e = document.getElementById("userSelect");
+
+        if (e.options[e.selectedIndex] == undefined){
+          console.log("nothing selected");
+        }
+        
+        else{
+          let selectedUser = e.options[e.selectedIndex].text;
+          let selectedId = e.options[e.selectedIndex].value;
+          let newUsername = document.getElementById("username").value; 
+          let newPassword = document.getElementById("password").value;
+          if (newUsername == "" && newPassword == ""){
+            console.log("empty user and pass");
+            //return empty fields
+          }
+          else{
+            let newCredentials = {};
+            newCredentials.id = selectedId;
+            newCredentials.username = newUsername;
+            newCredentials.password = newPassword;
+
+            $.ajax({
+          url: "http://localhost:3000/api/updateCredentials/" + JSON.stringify(newCredentials),
+          type: "POST",
+          contentType: "plain/text",
+          success: function(status){
+            if (status == "success"){
+              console.log("credentials changed successfully");
+            }
+            else{
+              console.log(status);
+              $('#errorMessage').text("Incorrect username or password"); 
+            }
+          },
+          error: function(status){
+            console.log("error: " + status);
+            $('#errorMessage').text("Problem logging in: " + status); 
+          }
+        });
+          }
+        }
+      });
+
+    $("#houseSetupForm").submit(function(event) {
+        event.preventDefault();
+
+        var prosumer = {};
+
+        if (document.getElementById("producerCheck").checked == true){
+          prosumer.producer = true;
+        }
+        else{
+          prosumer.producer = false;
+        }
+
+        prosumer.batteryCapacity = document.getElementById("batteryCapacity").value; 
+        prosumer.shareToMarket  = document.getElementById("excessMarket").value; 
+        prosumer.marketSharePurchase = document.getElementById("missingMarket").value; 
+
+        if (prosumer.batteryCapacity < 0){
+          console.log("NULL!!!!");
+        }
+
+        /*let file = document.getElementById("houseImage").files[0];
+        if (file != undefined){
+          console.log(file);
+          var json = {};
+          json.image = file;
+          console.log(json);
+          //Test shit
+
+          prosumer.image = file;
+        }*/
+
+        console.log(prosumer);
+        
+        $.ajax({
+          url: "http://localhost:3000/api/createProsumer/" + JSON.stringify(prosumer),
+          type: "POST",
+          contentType: "plain/text",
+          success: function(status){
+            if (status == "success"){
+              console.log("prosumer created successfully");
+            }
+            else{
+              console.log("exists");
+              console.log("user already has a prosumer");
+              $('#errorMessage').text("Incorrect username or password"); 
+            }
+          },
+          error: function(status){
+            console.log("error: " + status);
+            $('#errorMessage').text("Problem logging in: " + status); 
+          }
+        });
+
+    });
+
+    function uploadImage(){
+      let file = document.getElementById("houseImage").files[0];
+      if (file != undefined){
+        //do shit
+        console.log(file);
+      }
+
+      /*$.ajax({
+          url: "http://localhost:3000/api/uploadHouseImage/",
+          type: 'post',
+          dataType: 'json',
+          data: data,
+          processData: false,
+          contentType: false,
+          success: function(status)
+          {
+            console.log("image uploaded successfully");
+          },
+          error: function(status){
+            console.log("error uploading image");
+          }
+      });*/
+    };
+    
+    </script>
+
+
+
 
     <script>
       function logout(){

@@ -40,9 +40,33 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="houseSettings.html">
-                  <span data-feather="settings"></span>
-                  House settings
+                <a class="nav-link" href="#">
+                  <span data-feather="file"></span>
+                  Orders
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="shopping-cart"></span>
+                  Products
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="users"></span>
+                  Customers
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="bar-chart-2"></span>
+                  Reports
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="layers"></span>
+                  Integrations
                 </a>
               </li>
             </ul>
@@ -53,38 +77,9 @@
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
             <h1 class="h2">Dashboard</h1>
           </div>
+          <p id="userList">hej</p>
 
-          <canvas class="my-4" id="myChart" width="900" height="380"></canvas>
-
-          <h2>Prosumer stats</h2>
-          <div class="table-responsive">
-            <table class="table table-striped table-sm">
-              <thead>
-                <tr>
-                  <th>Production</th>
-                  <th>Consumption</th>
-                  <th>Net production</th>
-                  <th>Windspeed</th>
-                  <th>Battery</th>
-                  <th>Blackout</th>
-                  <th>Market price</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td id="production"></td>
-                  <td id="consumption"></td>
-                  <td id="netProduction"></td>
-                  <td id="windspeed"></td>
-                  <td id="battery"></td>
-                  <td id="blackout"></td>
-                  <td id="marketPrice"></td>
-                  <td id="date"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          
         </main>
       </div>
     </div>
@@ -103,57 +98,9 @@
       feather.replace()
     </script>
 
-    <!-- Graphs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
-    <script>
-      function newChart(production, consumption){
-        console.log("function called");
-      var ctx = document.getElementById("myChart");
-      var myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-          datasets: [
-          {
-            data: [0, consumption, 10, 0, 10, 0, 10],
-            lineTension: 0.2,
-            backgroundColor: 'transparent',
-            borderColor: 'red',
-            borderWidth: 4,
-            pointBackgroundColor: '#red'
-          },
-
-          {
-            data: [0, production, 0, 10, 0, 10, 0],
-            lineTension: 0.2,
-            backgroundColor: 'transparent',
-            borderColor: 'green',
-            borderWidth: 4,
-            pointBackgroundColor: '#green'
-          }
-        
-        ]
-        },
-        options: {
-          scales: {
-            yAxes: [{
-              ticks: {
-                beginAtZero: false
-              }
-            }]
-          },
-          legend: {
-            display: false,
-          }
-        }
-      });
-    }
-    </script>
 <script>
-  var date = 0;
-  setInterval(function(){
     $.ajax({
-      url: "http://localhost:3000/api/getDashboardProsumer/",
+      url: "http://localhost:3000/api/getAllNormalUsers/",
       type: "GET",
       contentType: "plain/text",
       success: function(status){
@@ -163,35 +110,31 @@
           let url = "../signin.html";
           window.location = url;
         }
+        else if (status == "notManager"){
+          
+        }
         else{
           console.log(status);
-          let prosumer = JSON.parse(status);
-          if (prosumer[0].date > date){
-            date = prosumer[0].date;
-            newChart(production, consumption);
-            $('#production').text(prosumer[0].production); 
-            $('#consumption').text(prosumer[0].consumption); 
-            $('#windspeed').text(prosumer[0].wind); 
-            $('#battery').text(prosumer[0].battery + " / " + prosumer[0].batteryCapacity); 
-            $('#netProduction').text((prosumer[0].production - prosumer[0].consumption).toFixed(4)); 
-            $('#blackout').text(prosumer[0].blackout);
-            if (prosumer[1].useCustomPrice == 0){
-              $('#marketPrice').text(prosumer[1].modelPrice);
+          let users = JSON.parse(status);
+          console.log("amount of users " + users.length);
+          var usersString = "";
+          for (var i = 0; i < users.length; i++){
+            if (i == 0){
+              usersString += users[i].username;
             }
             else{
-              $('#marketPrice').text(prosumer[1].customPrice);
+              usersString += " NEWLINE " + users[i].username;
             }
-            var d = new Date(prosumer[0].date);
-            $('#date').text(d.getHours() + ":"+ d.getMinutes() + ":" + d.getSeconds() + " " + d.toDateString());
-
           }
+          console.log(usersString);
+          $('#userList').text(usersString); 
         }
-      },
+        },
       error: function(status){
         $('#textBox').text("Error: " + status); 
       }
+      
     });
-  }, 800);
     </script>
 
     <script>
