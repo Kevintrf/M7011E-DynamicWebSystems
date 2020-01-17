@@ -214,41 +214,52 @@ function generatePower(index, prosumerList){
 
 function handleExcessPower(index, prosumerList, manager){
     if (prosumerList[index].power > 0){
-        console.log("excess power for user " + index);
-        //Send to battery
+        if (prosumerList[index].marketBlockUntil < Date.now()){
+            console.log("user allowed to sell on market");
+            console.log("excess power for user " + index);
+            //Send to battery
 
-        //Gör om i DB:n så det är shareToBattery så blir det lättare/snyggare i koden
-        var excessPowerBattery = prosumerList[index].power * (1-prosumerList[index].shareToMarket * 0.01)
-        var excessPowerMarket = prosumerList[index].power * prosumerList[index].shareToMarket * 0.01;
-        var battery = prosumerList[index].battery;
-        var batteryCapacity = prosumerList[index].batteryCapacity;
+            //Gör om i DB:n så det är shareToBattery så blir det lättare/snyggare i koden
+            var excessPowerBattery = prosumerList[index].power * (1-prosumerList[index].shareToMarket * 0.01)
+            var excessPowerMarket = prosumerList[index].power * prosumerList[index].shareToMarket * 0.01;
+            var battery = prosumerList[index].battery;
+            var batteryCapacity = prosumerList[index].batteryCapacity;
 
-        if (battery >= batteryCapacity){
-            prosumerList[index].battery = batteryCapacity;
-            console.log("Battery of user " + index + " already full");
-        }
+            if (battery >= batteryCapacity){
+                prosumerList[index].battery = batteryCapacity;
+                console.log("Battery of user " + index + " already full");
+            }
 
-        else if (excessPowerBattery + battery >= batteryCapacity){
-            prosumerList[index].battery = batteryCapacity;
+            else if (excessPowerBattery + battery >= batteryCapacity){
+                prosumerList[index].battery = batteryCapacity;
 
-            excessPowerBattery = excessPowerBattery + battery - batteryCapacity;
-            
-            console.log("Battery of user " + index + " set to " + batteryCapacity);
+                excessPowerBattery = excessPowerBattery + battery - batteryCapacity;
+                
+                console.log("Battery of user " + index + " set to " + batteryCapacity);
+            }
+
+            else{
+                prosumerList[index].battery = excessPowerBattery + battery;
+                excessPowerBattery = 0;
+                console.log("Battery of user " + index + " set to " + (prosumerList[index].battery));
+            }
+
+            //Send to market
+            excessPowerMarket = excessPowerMarket + excessPowerBattery;
+            market += excessPowerMarket;
+            console.log("User " + index + " sent " + excessPowerMarket + " power to market (DOES NOTHING NOW, FIX LATER)");
+
+            prosumerList[index].power = 0;
         }
 
         else{
-            prosumerList[index].battery = excessPowerBattery + battery;
-            excessPowerBattery = 0;
-            console.log("Battery of user " + index + " set to " + (prosumerList[index].battery));
+            console.log("User blocked from selling on market!");
+            prosumerList[index].battery += prosumerList[index].power;
+            prosumerList[index].power = 0;
+            if (prosumerList[index].battery > prosumerList[index].batteryCapacity){
+                prosumerList[index].battery = prosumerList[index].batteryCapacity;
+            }
         }
-
-
-        //Send to market
-        excessPowerMarket = excessPowerMarket + excessPowerBattery;
-        market += excessPowerMarket;
-        console.log("User " + index + " sent " + excessPowerMarket + " power to market (DOES NOTHING NOW, FIX LATER)");
-
-        prosumerList[index].power = 0;
     }
 
     if (prosumerList[index].manager == 1 && prosumerList[index].powerplantStatus != "running"){

@@ -36,12 +36,12 @@ Task.deleteUser = function(input, req, result){
             }
             else{
                 if (res[0].manager == 1){
-                    sql.query("DELETE FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+                    sql.query("DELETE FROM prosumers WHERE id = '" + input + "'", function (err, res) {  
                         if (err){
                             result(err, null);
                         }
                         else{
-                            sql.query("DELETE FROM users WHERE id = '" + id + "'", function (err, res) {  
+                            sql.query("DELETE FROM users WHERE id = '" + input + "'", function (err, res) {  
                                 if (err){
                                     result(err, null);
                                 }
@@ -115,7 +115,7 @@ Task.registerUser = function (input, result) {
         else{
             if (res.length == 0){
                 bcrypt.hash(newUser.password, saltRounds, function (err, hash){
-                    sql.query("INSERT INTO users VALUES (null, '" + newUser.username + "', '" + hash  + "') ", function (err, res) {
+                    sql.query("INSERT INTO users VALUES (null, '" + newUser.username + "', '" + hash  + "', '0') ", function (err, res) {
                         if (err){
                             console.log(err);
                             result(err, null);
@@ -174,43 +174,55 @@ Task.login = function (input, req, result) {
 Task.createProsumer = function (input, req, result) {
     if (req.session.userid){
         let id = req.session.userid;
-        sql.query("SELECT * FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
-            if (err){
-                result(err, null);
-            }
-            else{
-                if (res.length == 0){
-                    var newProsumer = JSON.parse(input);
-
-                    if (input.battery < 0){
-                        result("invalidBattery", null);
-                    }
-
-                    else if (input.shareToMarket > 100 || input.shareToMarket < 0){
-                        result("invalidShareToMarket", null);
-                    }
-
-                    else if (input.marketSharePurchase > 100 || input.marketSharePurchase < 0){
-                        result("invalidMarketSharePurchase", null);
-                    }
-
-                    else{
-                        sql.query("INSERT INTO prosumers VALUES ('" + id + "', 0, '" + newProsumer.batteryCapacity + "', 0, 0, 0, '" + newProsumer.shareToMarket + "', '" + newProsumer.marketSharePurchase + "', 0, false, " + newProsumer.producer + ", null, null) ", function (err, res) {
-                            if (err){
-                                console.log(err);
-                                result(err, null);
-                            }
-                            else{
-                                result(null, "success");
-                            }
-                        });
-                    }
+        sql.query("SELECT manager FROM users WHERE id = '" + id + "'", function (err, res) {  
+            sql.query("SELECT * FROM prosumers WHERE id = '" + id + "'", function (err, res2) {  
+                if (err){
+                    result(err, null);
                 }
-                
                 else{
-                    result(null, "alreadyExists");
+                    if (res2.length == 0){
+                        var newProsumer = JSON.parse(input);
+                        var producer = 0;
+                        var manager = 0;
+
+                        if (res[0].manager == "1"){
+                            manager = 1;
+                        }
+
+                        if (newProsumer.producer == true){
+                            producer = 1;
+                        }
+
+                        if (input.battery < 0){
+                            result("invalidBattery", null);
+                        }
+
+                        else if (input.shareToMarket > 100 || input.shareToMarket < 0){
+                            result("invalidShareToMarket", null);
+                        }
+
+                        else if (input.marketSharePurchase > 100 || input.marketSharePurchase < 0){
+                            result("invalidMarketSharePurchase", null);
+                        }
+
+                        else{
+                            sql.query("INSERT INTO prosumers VALUES ('" + id + "', 0, '" + newProsumer.batteryCapacity + "', '0', '0', '0', '" + newProsumer.shareToMarket + "', '" + newProsumer.marketSharePurchase + "', '0', '" + manager + "', '" + producer + "', null, null, null, null) ", function (err, res3) {
+                                if (err){
+                                    console.log(err);
+                                    result(err, null);
+                                }
+                                else{
+                                    result(null, "success");
+                                }
+                            });
+                        }
+                    }
+                    
+                    else{
+                        result(null, "alreadyExists");
+                    }
                 }
-            }
+            });
         });
     }
 
@@ -279,6 +291,82 @@ Task.stopPowerplant = function (req, result){
                             result(null, "success");
                         }
                     });
+                }
+                else{
+                    result(err, "notManager");
+                }
+            }
+        });
+    }
+    else{
+        result(null, "loggedout");
+    }
+}
+
+Task.updateCredentials = function (input, req, result){
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
+            }
+            else{
+                if (res[0].manager == 1){
+                    let newCredentials = JSON.parse(input);
+                    console.log(newCredentials);
+                    if (newCredentials.username.length > 1 && newCredentials.password.length > 1){
+                        //update both
+                        sql.query("SELECT username FROM users WHERE username = '" + newCredentials.username + "'", function (err, res2) {
+                            if (res2.length > 0){
+                                result(null, "usernameTaken");
+                            }
+                            else{
+                                bcrypt.hash(newCredentials.password, saltRounds, function (err, hash){
+                                    sql.query("UPDATE users SET username='" + newCredentials.username + "', password='" + hash + "' WHERE id = '" + newCredentials.id + "'", function (err, res) {  
+                                        if (err){
+                                            result(err, null);
+                                        }
+                                        else{
+                                            result(null, "success");
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                    }
+
+                    else if (newCredentials.username.length > 1){
+                        //update username
+                        sql.query("SELECT username FROM users WHERE username = '" + newCredentials.username + "'", function (err, res2) {
+                            if (res2.length > 0){
+                                result(null, "usernameTaken");
+                            }
+                            else{
+                                sql.query("UPDATE users SET username='" + newCredentials.username + "' WHERE id = '" + newCredentials.id + "'", function (err, res) {  
+                                    if (err){
+                                        result(err, null);
+                                    }
+                                    else{
+                                        result(null, "success");
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    else if (newCredentials.password.length > 1){
+                        //update pw
+                        bcrypt.hash(newCredentials.password, saltRounds, function (err, hash){
+                            sql.query("UPDATE users SET password='" + hash + "' WHERE id = '" + newCredentials.id + "'", function (err, res) {  
+                                if (err){
+                                    result(err, null);
+                                }
+                                else{
+                                    result(null, "success");
+                                }
+                            });
+                        });
+                    }
                 }
                 else{
                     result(err, "notManager");
@@ -438,6 +526,35 @@ Task.getProsumerById = function (id, result) {
         }
     });   
 };
+
+Task.getAllNormalUsers = function (req, result){
+    if (req.session.userid){
+        let id = req.session.userid;
+        sql.query("SELECT manager FROM prosumers WHERE id = '" + id + "'", function (err, res) {  
+            if (err){
+                result(err, null);
+            }
+            else{
+                if (res[0].manager == 1){
+                    sql.query("SELECT id, username FROM users WHERE manager='0' ", function (err, res2) {  
+                        if (err){
+                            result(err, null);
+                        }
+                        else{
+                            result(null, JSON.stringify(res2));
+                        }
+                    });
+                }
+                else{
+                    result(err, "notManager");
+                }
+            }
+        });
+    }
+    else{
+        result(null, "loggedout");
+    }
+}
 
 Task.getAllProsumers = function (result) {
     sql.query("Select * from prosumers", function (err, res) {

@@ -33,4 +33,5 @@
 |2020-01-13|5|Frontend work|
 |2020-01-14|5|Frontend, work on file upload|
 |2020-01-15|11|Frontend work, simulator, db|
-|2020-01-16|6 19:30-pågår|Frontend, see blackout for managers|
+|2020-01-16|10|Frontend, see blackout for managers|
+|2020-01-17|10:00-pågår|blä|

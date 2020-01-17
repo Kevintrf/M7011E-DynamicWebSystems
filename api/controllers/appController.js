@@ -168,6 +168,28 @@ exports.createProsumer = function(req, res) {
   });
 };
 
+exports.updateCredentials = function(req, res) {
+  Task.updateCredentials(req.params.query, req, function(err, result) {
+    if (err){
+      res.send(err);
+    }
+    else{
+      res.send(result);
+    }
+  });
+};
+
+exports.getAllNormalUsers = function(req, res) {
+  Task.getAllNormalUsers(req, function(err, result) {
+    if (err){
+      res.send(err);
+    }
+    else{
+      res.send(result);
+    }
+  });
+};
+
 exports.getProsumerById = function(req, res) {
   Task.getProsumerById(req.params.query, function(err, result) {
     if (err){

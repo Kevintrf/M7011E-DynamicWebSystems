@@ -21,6 +21,12 @@ module.exports = function(app) {
   app.route('/api/startPowerplant')
   .post(controller.startPowerplant);
 
+  app.route('/api/updateCredentials/:query')
+  .post(controller.updateCredentials)
+
+  app.route('/api/getAllNormalUsers')
+  .get(controller.getAllNormalUsers);
+
   app.route('/api/useCustomPrice/:query')
   .post(controller.useCustomPrice);
 

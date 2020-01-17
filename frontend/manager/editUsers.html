@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
-    <title>House setup</title>
+    <title>Edit user</title>
 
     <!-- Bootstrap core CSS -->
     <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
@@ -80,7 +80,7 @@
 
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="h2">House setup</h1>
+            <h1 class="h2">Edit user</h1>
           </div>
 
           <form id="editUserForm">
@@ -131,8 +131,17 @@
     <script>
     function deleteUser(){
       console.log("deleteuser");
-      var deleteId = 1; //Test
-      $.ajax({
+      console.log()
+      var e = document.getElementById("userSelect");
+
+      if (e.options[e.selectedIndex] == undefined){
+        console.log("nothing selected");
+        //return error
+      }
+
+      else{
+        var deleteId = e.options[e.selectedIndex].value;
+        $.ajax({
           url: "http://localhost:3000/api/deleteUser/" + deleteId,
           type: "POST",
           contentType: "plain/text",
@@ -144,6 +153,7 @@
             }
             if (status == "success"){
               console.log("success");
+              updateUsers();
             }
             else{
               console.log(status);
@@ -155,14 +165,55 @@
             $('#errorMessage').text("Problem deleting user: " + status);
           }
         });
+      }
+
     }
     </script>
 
     <script>
-      var select = document.getElementById("userSelect");
-     var option = document.createElement("option");
-    option.value = option.text = "hej";
-    select.add( option );
+      updateUsers();
+      function updateUsers(){
+    var select = document.getElementById("userSelect");
+
+
+        $.ajax({
+      url: "http://localhost:3000/api/getAllNormalUsers/",
+      type: "GET",
+      contentType: "plain/text",
+      success: function(status){
+        if (status == "loggedout")
+        {
+          console.log("logged out!");
+          let url = "../signin.html";
+          window.location = url;
+        }
+        else if (status == "notManager"){
+          
+        }
+        else{
+          console.log(status);
+          let users = JSON.parse(status);
+          console.log("amount of users " + users.length);
+          var usersString = "";
+          for (var i = 0; i < users.length; i++){
+            var option = document.createElement("option");
+            option.value = users[i].id;
+            option.text = users[i].username;
+            select.add(option);
+          }
+          console.log(usersString);
+          $('#userList').text(usersString); 
+        }
+        },
+      error: function(status){
+        $('#textBox').text("Error: " + status); 
+      }
+      
+    });
+  }
+    </script>
+
+    <script>
 
       $("#editUserForm").submit(function(event) {
         event.preventDefault();
@@ -173,9 +224,39 @@
         }
         
         else{
-          var strUser = e.options[e.selectedIndex].text;
-        
-          console.log(strUser);
+          let selectedUser = e.options[e.selectedIndex].text;
+          let selectedId = e.options[e.selectedIndex].value;
+          let newUsername = document.getElementById("username").value; 
+          let newPassword = document.getElementById("password").value;
+          if (newUsername == "" && newPassword == ""){
+            console.log("empty user and pass");
+            //return empty fields
+          }
+          else{
+            let newCredentials = {};
+            newCredentials.id = selectedId;
+            newCredentials.username = newUsername;
+            newCredentials.password = newPassword;
+
+            $.ajax({
+          url: "http://localhost:3000/api/updateCredentials/" + JSON.stringify(newCredentials),
+          type: "POST",
+          contentType: "plain/text",
+          success: function(status){
+            if (status == "success"){
+              console.log("credentials changed successfully");
+            }
+            else{
+              console.log(status);
+              $('#errorMessage').text("Incorrect username or password"); 
+            }
+          },
+          error: function(status){
+            console.log("error: " + status);
+            $('#errorMessage').text("Problem logging in: " + status); 
+          }
+        });
+          }
         }
       });
 
@@ -260,65 +341,8 @@
     
     </script>
 
-<script>
-    var excessBatterySlider = document.getElementById("excessBattery");
-    var excessBatteryOutput = document.getElementById("excessBatteryText");
-    excessBatteryOutput.innerHTML = "To battery: " + excessBatterySlider.value + "%"; // Display the default slider value
 
-    var excessMarketSlider = document.getElementById("excessMarket");
-    var excessMarketOutput = document.getElementById("excessMarketText");
-    excessMarketOutput.innerHTML = "To market: " + excessMarketSlider.value + "%"; // Display the default slider value
 
-    // Update the current slider value (each time you drag the slider handle)
-    excessBatterySlider.oninput = function() {
-      excessBatteryOutput.innerHTML = "To battery: " + this.value + "%";
-      var marketSliderValue = 100 - this.value;
-      excessMarketSlider.value = marketSliderValue;
-      excessMarketOutput.innerHTML = "To market: " + marketSliderValue + "%";
-    }
-
-    excessMarketSlider.oninput = function() {
-      excessMarketOutput.innerHTML = "To market: " + this.value + "%";
-      var batterySliderValue = 100 - this.value;
-      excessBatterySlider.value = batterySliderValue;
-      excessBatteryOutput.innerHTML = "To market: " + batterySliderValue + "%";
-    }
-
-    batteryCheck.oninput = function() {
-      if (document.getElementById("batteryCheck").checked == false){
-        batteryCapacity.value = 0;
-        document.getElementById("batteryCapacity").disabled = true;
-      }
-      else{
-        document.getElementById("batteryCapacity").disabled = false;
-      }
-    }
-    </script>
-
-<script>
-    var missingBatterySlider = document.getElementById("missingBattery");
-    var missingBatteryOutput = document.getElementById("missingBatteryText");
-    missingBatteryOutput.innerHTML = "From battery: " + missingBatterySlider.value + "%"; // Display the default slider value
-
-    var missingMarketSlider = document.getElementById("missingMarket");
-    var missingMarketOutput = document.getElementById("missingMarketText");
-    missingMarketOutput.innerHTML = "From market: " + missingMarketSlider.value + "%"; // Display the default slider value
-
-    // Update the current slider value (each time you drag the slider handle)
-    missingBatterySlider.oninput = function() {
-      missingBatteryOutput.innerHTML = "From battery: " + this.value + "%";
-      var marketSliderValue = 100 - this.value;
-      missingMarketSlider.value = marketSliderValue;
-      missingMarketOutput.innerHTML = "From market: " + marketSliderValue + "%";
-    }
-
-    missingMarketSlider.oninput = function() {
-      missingMarketOutput.innerHTML = "From market: " + this.value + "%";
-      var batterySliderValue = 100 - this.value;
-      missingBatterySlider.value = batterySliderValue;
-      missingBatteryOutput.innerHTML = "From market: " + batterySliderValue + "%";
-    }
-    </script>
 
     <script>
       function logout(){
