@@ -19,5 +19,8 @@
 | 2020-01-08 |     3  | Sessions frontend  |
 | 2020-01-09 |     3,5  | frontend work that was unessesary as we did the same thing  |
 | 2020-01-10 |     3  | group work, final planning, |
+| 2020-01-13 |     1,5  | report writing|
+| 2020-01-16 |     1  | report writing|
+| 2020-01-17 |     4,5  | report writing|
 
 
