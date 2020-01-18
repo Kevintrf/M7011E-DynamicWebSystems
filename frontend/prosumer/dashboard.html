@@ -7,12 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
     <title>Dashboard</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="dashboard.css" rel="stylesheet">
@@ -54,8 +50,6 @@
             <h1 class="h2">Dashboard</h1>
           </div>
 
-          <canvas class="my-4" id="myChart" width="900" height="380"></canvas>
-
           <h2>Prosumer stats</h2>
           <div class="table-responsive">
             <table class="table table-striped table-sm">
@@ -94,8 +88,6 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
-    <script src="../../assets/js/vendor/popper.min.js"></script>
-    <script src="../../dist/js/bootstrap.min.js"></script>
 
     <!-- Icons -->
     <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
@@ -103,52 +95,6 @@
       feather.replace()
     </script>
 
-    <!-- Graphs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
-    <script>
-      function newChart(production, consumption){
-        console.log("function called");
-      var ctx = document.getElementById("myChart");
-      var myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-          datasets: [
-          {
-            data: [0, consumption, 10, 0, 10, 0, 10],
-            lineTension: 0.2,
-            backgroundColor: 'transparent',
-            borderColor: 'red',
-            borderWidth: 4,
-            pointBackgroundColor: '#red'
-          },
-
-          {
-            data: [0, production, 0, 10, 0, 10, 0],
-            lineTension: 0.2,
-            backgroundColor: 'transparent',
-            borderColor: 'green',
-            borderWidth: 4,
-            pointBackgroundColor: '#green'
-          }
-        
-        ]
-        },
-        options: {
-          scales: {
-            yAxes: [{
-              ticks: {
-                beginAtZero: false
-              }
-            }]
-          },
-          legend: {
-            display: false,
-          }
-        }
-      });
-    }
-    </script>
 <script>
   var date = 0;
   setInterval(function(){
@@ -168,7 +114,6 @@
           let prosumer = JSON.parse(status);
           if (prosumer[0].date > date){
             date = prosumer[0].date;
-            newChart(production, consumption);
             $('#production').text(prosumer[0].production); 
             $('#consumption').text(prosumer[0].consumption); 
             $('#windspeed').text(prosumer[0].wind); 

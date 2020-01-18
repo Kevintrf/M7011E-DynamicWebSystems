@@ -56,6 +56,9 @@ module.exports = function(app) {
 
   app.route('/api/createProsumer/:query')
   .post(controller.createProsumer);
+
+  app.route('/api/updateProsumer/:query')
+  .post(controller.updateProsumer);
    
   app.route('/api/getProsumerById/:query')
   .get(controller.getProsumerById)

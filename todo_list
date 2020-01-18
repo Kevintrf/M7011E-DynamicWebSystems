@@ -3,11 +3,8 @@
 	Implement errorbox/successbox on all frontend pages
 -Upload picture in houseSetup
 	-Show picture somewhere on dashboard
--Add updateHouse page
 
 --Manager--
--Screen to change values (almost like houseSetup)
--When producing, control ratio sent to buffer/market (when stopped buffer supplies market demand)
 -See who is logged in
 
 --API
@@ -20,9 +17,10 @@ Everything should be done, doublecheck later!
 -Redirect from prosumer/manager page to other page if ex. manager is on prosumer site
 -Switch all api calls from "localhost" to file directory so it works online
 -Test the application online, watch for CORS errors
--Fix sidebuttons to lead to correct links (done on prosumer side)
 -After deleting/changing username on a user in editUsers the select list needs to be cleared before it is updated
 -Weird error comes up after blocking user in chrome dev tools, it still works tho
 
+remove all missing links that create errors in dev console on web
+edit titles on all pages
 
 CREATE TESTS!!!!

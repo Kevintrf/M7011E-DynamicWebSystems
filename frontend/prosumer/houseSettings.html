@@ -7,15 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
-    <title>House setup</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>House settings</title>
 
     <!-- Custom styles for this template -->
-    <link href="houseSetup.css" rel="stylesheet">
+    <link href="houseSettings.css" rel="stylesheet">
   </head>
 
   <body>
@@ -56,7 +52,7 @@
 
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="h2">House setup</h1>
+            <h1 class="h2">House settings</h1>
           </div>
 
           <span style="color:red;"><h2 id ="errorMessage"></h2></span>
@@ -79,8 +75,8 @@
                   <br>
               <div class="form-group">
                 <h3>Battery capacity</h3>
-                <input type="number" class="form-control" id="batteryCapacity" placeholder="50 ounces" required>
-                <small id="batteryCapacityHelp" class="form-text text-muted">Battery capacity is measured in gallons</small>
+                <input type="number" class="form-control" id="batteryCapacity" placeholder="50" required>
+                <small id="batteryCapacityHelp" class="form-text text-muted">Battery capacity</small>
               </div>
 
               <h3>Send excess power</h3>
@@ -107,16 +103,11 @@
                 <input type="range" min="0" max="100" value="50" class="slider" id="missingMarket">
               </div>
               <br>
-              <button type="submit" class="btn btn-primary">Create</button>
+              <button type="submit" class="btn btn-primary">Update</button>
               <br><br>
               <br><br>
               
             </form>
-            <h3>House image</h3>
-              <form method="post" enctype="multipart/form-data" action="http://localhost:3000/api/uploadImage/">
-                <input type="file" name="file">
-                <br><br><input type="submit" value="Upload image">
-              </form>
         </main>
       </div>
     </div>
@@ -126,8 +117,6 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
-    <script src="../../assets/js/vendor/popper.min.js"></script>
-    <script src="../../dist/js/bootstrap.min.js"></script>
 
     <!-- Icons -->
     <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
@@ -156,35 +145,19 @@
           console.log("NULL!!!!");
         }
 
-        /*let file = document.getElementById("houseImage").files[0];
-        if (file != undefined){
-          console.log(file);
-          var json = {};
-          json.image = file;
-          console.log(json);
-          //Test shit
-
-          prosumer.image = file;
-        }*/
-
         console.log(prosumer);
         
         $.ajax({
-          url: "http://localhost:3000/api/createProsumer/" + JSON.stringify(prosumer),
+          url: "http://localhost:3000/api/updateProsumer/" + JSON.stringify(prosumer),
           type: "POST",
           contentType: "plain/text",
           success: function(status){
             if (status == "success"){
               console.log("prosumer created successfully");
-              $('#errorMessage').text("User created successfully"); 
+              $('#errorMessage').text("Update successful"); 
             }
             else{
-              if (status == "alreadyExists"){
-                $('#errorMessage').text("There is already a user associated with your account"); 
-              }
-              else{
-                $('#errorMessage').text("There was an error creating your prosumer"); 
-              }
+              $('#errorMessage').text("There was an error updating: " + status); 
             }
           },
           error: function(status){
@@ -194,31 +167,7 @@
         });
 
     });
-
-    function uploadImage(){
-      let file = document.getElementById("houseImage").files[0];
-      if (file != undefined){
-        //do shit
-        console.log(file);
-      }
-
-      /*$.ajax({
-          url: "http://localhost:3000/api/uploadHouseImage/",
-          type: 'post',
-          dataType: 'json',
-          data: data,
-          processData: false,
-          contentType: false,
-          success: function(status)
-          {
-            console.log("image uploaded successfully");
-          },
-          error: function(status){
-            console.log("error uploading image");
-          }
-      });*/
-    };
-    
+  
     </script>
 
 <script>
@@ -281,11 +230,9 @@
     }
     </script>
 
-<script>
-  var date = 0;
-  setInterval(function(){
+    <script>
     $.ajax({
-      url: "http://localhost:3000/api/getMyProsumer/",
+      url: "http://localhost:3000/api/getDashboardProsumer/",
       type: "GET",
       contentType: "plain/text",
       success: function(status){
@@ -296,14 +243,48 @@
           window.location = url;
         }
         else{
+          console.log(status);
+          let prosumer = JSON.parse(status);
 
+          batteryCapacity.value = prosumer[0].batteryCapacity;
+
+          if (prosumer[0].batteryCapacity == 0){
+            document.getElementById("batteryCheck").checked = false;
+            document.getElementById("batteryCapacity").disabled = true;
+          }
+
+          if (prosumer[0].producer == "1"){
+            document.getElementById("producerCheck").checked = true;
+          }
+          else{
+            document.getElementById("producerCheck").checked = false;
+          }
+
+          var excessBatterySlider = document.getElementById("excessBattery");
+          var excessBatteryOutput = document.getElementById("excessBatteryText");
+          excessBatteryOutput.innerHTML = "To battery: " + (100 - prosumer[0].shareToMarket) + "%";
+          excessBatterySlider.value = 100 - prosumer[0].shareToMarket;
+
+          var excessMarketSlider = document.getElementById("excessMarket");
+          var excessMarketOutput = document.getElementById("excessMarketText");
+          excessMarketOutput.innerHTML = "To market: " + prosumer[0].shareToMarket + "%";
+          excessMarketSlider.value = prosumer[0].shareToMarket;
+
+          var missingBatterySlider = document.getElementById("missingBattery");
+          var missingBatteryOutput = document.getElementById("missingBatteryText");
+          missingBatteryOutput.innerHTML = "From battery: " + (100 - prosumer[0].marketSharePurchase) + "%";
+          missingBatterySlider.value = 100 - prosumer[0].marketSharePurchase;
+
+          var missingMarketSlider = document.getElementById("missingMarket");
+          var missingMarketOutput = document.getElementById("missingMarketText");
+          missingMarketOutput.innerHTML = "From market: " + prosumer[0].marketSharePurchase + "%";
+          missingMarketSlider.value = prosumer[0].marketSharePurchase;
         }
       },
       error: function(status){
-        $('#textBox').text("Error: " + status); 
+        console.log("Error loading prosumer info: " + error);
       }
     });
-  }, 1000);
     </script>
 
     <script>

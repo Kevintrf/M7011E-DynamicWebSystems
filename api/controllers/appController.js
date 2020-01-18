@@ -168,6 +168,17 @@ exports.createProsumer = function(req, res) {
   });
 };
 
+exports.updateProsumer = function(req, res) {
+  Task.updateProsumer(req.params.query, req, function(err, result) {
+    if (err){
+      res.send(err);
+    }
+    else{
+      res.send(result);
+    }
+  });
+};
+
 exports.updateCredentials = function(req, res) {
   Task.updateCredentials(req.params.query, req, function(err, result) {
     if (err){

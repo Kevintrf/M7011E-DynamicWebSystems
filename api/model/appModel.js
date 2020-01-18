@@ -249,59 +249,41 @@ Task.login = function (input, req, result) {
     });
 };
 
-Task.createProsumer = function (input, req, result) {
+
+
+Task.updateProsumer = function (input, req, result) {
     if (req.session.userid){
         let id = req.session.userid;
-        sql.query("SELECT manager FROM users WHERE id = '" + id + "'", function (err, res) {  
-            sql.query("SELECT * FROM prosumers WHERE id = '" + id + "'", function (err, res2) {  
+        var newProsumer = JSON.parse(input);
+        var producer = 0;
+
+        if (newProsumer.producer == true){
+            producer = 1;
+        }
+
+        if (input.battery < 0){
+            result("invalidBattery", null);
+        }
+
+        else if (input.shareToMarket > 100 || input.shareToMarket < 0){
+            result("invalidShareToMarket", null);
+        }
+
+        else if (input.marketSharePurchase > 100 || input.marketSharePurchase < 0){
+            result("invalidMarketSharePurchase", null);
+        }
+
+        else{
+            sql.query("UPDATE prosumers SET producer='" + producer + "', batteryCapacity='" + newProsumer.batteryCapacity + "', shareToMarket='" + newProsumer.shareToMarket + "', marketSharePurchase='" + newProsumer.marketSharePurchase + "' WHERE id='" + id + "' ", function (err, res) {
                 if (err){
+                    console.log(err);
                     result(err, null);
                 }
                 else{
-                    if (res2.length == 0){
-                        var newProsumer = JSON.parse(input);
-                        var producer = 0;
-                        var manager = 0;
-
-                        if (res[0].manager == "1"){
-                            manager = 1;
-                        }
-
-                        if (newProsumer.producer == true){
-                            producer = 1;
-                        }
-
-                        if (input.battery < 0){
-                            result("invalidBattery", null);
-                        }
-
-                        else if (input.shareToMarket > 100 || input.shareToMarket < 0){
-                            result("invalidShareToMarket", null);
-                        }
-
-                        else if (input.marketSharePurchase > 100 || input.marketSharePurchase < 0){
-                            result("invalidMarketSharePurchase", null);
-                        }
-
-                        else{
-                            sql.query("INSERT INTO prosumers VALUES ('" + id + "', 0, '" + newProsumer.batteryCapacity + "', '0', '0', '0', '" + newProsumer.shareToMarket + "', '" + newProsumer.marketSharePurchase + "', '0', '" + manager + "', '" + producer + "', null, null, null, null) ", function (err, res3) {
-                                if (err){
-                                    console.log(err);
-                                    result(err, null);
-                                }
-                                else{
-                                    result(null, "success");
-                                }
-                            });
-                        }
-                    }
-                    
-                    else{
-                        result(null, "alreadyExists");
-                    }
+                    result(null, "success");
                 }
             });
-        });
+        }
     }
 
     else{
