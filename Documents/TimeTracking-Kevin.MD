@@ -35,4 +35,4 @@
 |2020-01-15|11|Frontend work, simulator, db|
 |2020-01-16|10|Frontend, see blackout for managers|
 |2020-01-17|8|Frontend, api|
-|2020-01-18|10:00-pågår|frontend|
+|2020-01-18|13|Front, api, database, setting up online hosting. Struggling with cors/sessions (cors breaks our session handling but without it the site wont work)|
