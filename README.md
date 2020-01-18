@@ -21,3 +21,9 @@ The mysql should have the following settings
 ```Mysql
 mysql -u <piedpiper> -p <yourdatabasename> < <db.sql>
 ```
+### Startup
+In project folder
+
+```Startup
+Server.js
+```
