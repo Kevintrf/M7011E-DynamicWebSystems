@@ -23,8 +23,11 @@ DROP TABLE IF EXISTS `market`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `market` (
-  `id` int(11) DEFAULT NULL,
-  `power` decimal(8,4) DEFAULT NULL
+  `demand` decimal(8,4) DEFAULT NULL,
+  `supply` decimal(8,4) DEFAULT NULL,
+  `modelPrice` decimal(6,2) DEFAULT NULL,
+  `customPrice` decimal(6,2) DEFAULT NULL,
+  `useCustomPrice` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -34,7 +37,7 @@ CREATE TABLE `market` (
 
 LOCK TABLES `market` WRITE;
 /*!40000 ALTER TABLE `market` DISABLE KEYS */;
-INSERT INTO `market` VALUES (10,4997.9750),(1,0.3907),(1,0.3907),(3,0.9933),(3,0.9933);
+INSERT INTO `market` VALUES (0.0000,0.0000,0.00,0.00,0);
 /*!40000 ALTER TABLE `market` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -56,7 +59,12 @@ CREATE TABLE `prosumers` (
   `marketSharePurchase` int(11) DEFAULT NULL,
   `blackout` tinyint(1) DEFAULT NULL,
   `manager` tinyint(1) DEFAULT NULL,
-  `producer` tinyint(1) DEFAULT NULL
+  `producer` tinyint(1) DEFAULT NULL,
+  `date` bigint(20) DEFAULT NULL,
+  `wind` decimal(4,2) DEFAULT NULL,
+  `powerplantStatus` enum('stopped','starting','running') DEFAULT NULL,
+  `marketBlockUntil` bigint(20) DEFAULT NULL,
+  KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -66,7 +74,7 @@ CREATE TABLE `prosumers` (
 
 LOCK TABLES `prosumers` WRITE;
 /*!40000 ALTER TABLE `prosumers` DISABLE KEYS */;
-INSERT INTO `prosumers` VALUES (1,1.9551,50.0000,0.0000,1.1506,0.3668,25,50,0,NULL,NULL),(2,0.9755,50.0000,0.0000,0.9142,0.5074,25,50,0,NULL,NULL),(3,0.0000,500.0000,0.0000,1.1865,0.4772,100,0,0,1,1),(4,0.0000,0.0000,0.0000,1.7735,0.5239,0,0,0,0,1),(8,0.0000,0.0000,0.0000,0.0000,0.0000,0,0,0,0,1),(8,0.0000,0.0000,0.0000,0.0000,0.0000,0,0,0,0,1),(5,0.0000,0.0000,0.0000,0.0000,0.0000,0,0,0,0,1);
+INSERT INTO `prosumers` VALUES (1,0.0000,50.0000,0.0000,0.0000,0.0000,50,50,0,1,1,NULL,NULL,'stopped',NULL);
 /*!40000 ALTER TABLE `prosumers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -78,12 +86,13 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
-  `id` int(255) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(30) NOT NULL,
   `password` varchar(300) NOT NULL,
+  `manager` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=1338 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -92,7 +101,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'user1','pass'),(2,'user2','pass'),(8,'tjena','safepassword'),(34,'bror2','$2b$12$b4BF6vhdQcXlQtOuLXXl4.QPb6W0tOUtkc8cUeoZG/7f0vPOKW9de'),(50,'bror','$2b$12$p7erSao2f6DsEJkcb.nwZuCehnD5Scmi6SFnsrJV8snv7pVcMHLn.'),(1337,'admin','$2b$12$S/DLLREfeQqKpnHrU.UVnuND5/JxiGvhzDQRNntCLsCW9XE8p65TW');
+INSERT INTO `users` VALUES (1,'manager','$2b$12$n9I7Xo7QSj2DTfnKPsTiEe5R6V9BGH5VO4VLcl/Jgdfg73Ebr2BOu',1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -105,4 +114,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-10 15:06:33
+-- Dump completed on 2020-01-18 14:37:52

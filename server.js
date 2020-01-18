@@ -19,6 +19,8 @@ const mc = mysql.createConnection({
     password: 'piedpiper',
     database: 'node'
 });
+
+var simulator = require('./simulator/simulator');
  
 // connect to database
 mc.connect();

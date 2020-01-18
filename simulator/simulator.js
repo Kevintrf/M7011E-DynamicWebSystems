@@ -62,6 +62,8 @@ async function updateProsumersFromDatabase(){
                 }
             });
 
+            market = 0;
+
             prosumerList.forEach(function(item, index) {
                 checkBlackout(index, prosumerList);
             });
@@ -208,6 +210,18 @@ function generatePower(index, prosumerList){
         }
     }
     else{
+        let windspeed = currentWindSpeed();
+        let production = 0;
+        let consumption = currentConsumption();
+        let power = production - consumption;
+
+        prosumerList[index].wind = windspeed;
+        prosumerList[index].production = production;
+        prosumerList[index].consumption = consumption;
+        prosumerList[index].power = power;
+        console.log("User " + index + " production has been set to " + production);
+        console.log("User " + index + " consumption has been set to " + consumption);
+        console.log("User " + index + " power has been set to " + power);
         console.log("No power generated (is not a producer)");
     }
 }
@@ -247,7 +261,7 @@ function handleExcessPower(index, prosumerList, manager){
             //Send to market
             excessPowerMarket = excessPowerMarket + excessPowerBattery;
             market += excessPowerMarket;
-            console.log("User " + index + " sent " + excessPowerMarket + " power to market (DOES NOTHING NOW, FIX LATER)");
+            console.log("User " + index + " sent " + excessPowerMarket + " power to market");
 
             prosumerList[index].power = 0;
         }

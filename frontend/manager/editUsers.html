@@ -66,7 +66,7 @@
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
             <h1 class="h2">Edit user</h1>
           </div>
-
+          <p id="errorMessage"></p>
           <form id="editUserForm">
               <div class="form-group">
                   <label for="userSelect">Select user:</label>
@@ -135,6 +135,7 @@
             }
             if (status == "success"){
               console.log("success");
+              $('#errorMessage').text("User deleted successfully"); 
               updateUsers();
             }
             else{
@@ -231,11 +232,13 @@
           contentType: "plain/text",
           success: function(status){
             if (status == "success"){
+              $('#errorMessage').text("User updated"); 
               console.log("credentials changed successfully");
+              updateUsers();
             }
             else{
               console.log(status);
-              $('#errorMessage').text("Incorrect username or password"); 
+              $('#errorMessage').text("Error"); 
             }
           },
           error: function(status){
