@@ -25,5 +25,5 @@ mysql -u <piedpiper> -p <yourdatabasename> < <db.sql>
 In project folder
 
 ```Startup
-Server.js
+Node Server.js
 ```
