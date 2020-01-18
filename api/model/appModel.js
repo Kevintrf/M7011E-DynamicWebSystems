@@ -134,6 +134,79 @@ Task.registerUser = function (input, result) {
     });
 };
 
+Task.createUserAndProsumer = function (input, result) {
+    var newUser = JSON.parse(input);
+
+    sql.query("SELECT username FROM users WHERE username='" + newUser.username + "' ", function (err, res) {
+        if (err){
+            console.log(err);
+            result(err, null);
+        }
+
+        else{
+            if (res.length == 0){
+                bcrypt.hash(newUser.password, saltRounds, function (err, hash){
+                    sql.query("INSERT INTO users VALUES (null, '" + newUser.username + "', '" + hash  + "', '0') ", function (err, res) {
+                        if (err){
+                            console.log(err);
+                            result(err, null);
+                        }
+                        else{
+                            let id = res.insertId;
+                            sql.query("SELECT * FROM prosumers WHERE id = '" + id + "'", function (err, res2) {  
+                                if (err){
+                                    result(err, null);
+                                }
+                                else{
+                                    if (res2.length == 0){
+                                        var producer = 0;
+                
+                                        if (newUser.producer == true){
+                                            producer = 1;
+                                        }
+                
+                                        if (newUser.battery < 0){
+                                            result("invalidBattery", null);
+                                        }
+                
+                                        else if (newUser.shareToMarket > 100 || newUser.shareToMarket < 0){
+                                            result("invalidShareToMarket", null);
+                                        }
+                
+                                        else if (newUser.marketSharePurchase > 100 || newUser.marketSharePurchase < 0){
+                                            result("invalidMarketSharePurchase", null);
+                                        }
+                
+                                        else{
+                                            sql.query("INSERT INTO prosumers VALUES ('" + id + "', 0, '" + newUser.batteryCapacity + "', '0', '0', '0', '" + newUser.shareToMarket + "', '" + newUser.marketSharePurchase + "', '0', '0', '" + producer + "', null, null, null, null) ", function (err, res3) {
+                                                if (err){
+                                                    console.log(err);
+                                                    result(err, null);
+                                                }
+                                                else{
+                                                    result(null, "success");
+                                                }
+                                            });
+                                        }
+                                    }
+                                    
+                                    else{
+                                        result(null, "alreadyExists");
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+            
+            else{
+                result(null, "usernameTaken");
+            }
+        }
+    });
+};
+
 Task.login = function (input, req, result) {
     var login = JSON.parse(input);
     sql.query("SELECT * FROM users WHERE username = '" + login.username + "' ", function (err, res) {

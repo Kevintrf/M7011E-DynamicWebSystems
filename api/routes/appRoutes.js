@@ -62,4 +62,7 @@ module.exports = function(app) {
 
   app.route('/api/blockFromMarket/:query')
   .post(controller.blockFromMarket);
+
+  app.route('/api/createUserAndProsumer/:query')
+  .post(controller.createUserAndProsumer);
 };

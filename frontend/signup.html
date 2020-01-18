@@ -1,77 +1,229 @@
 
 <!doctype html>
 <html lang="en">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
-    <title>its signup time bitch</title>
+    <title>User registration</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="signin.css" rel="stylesheet">
+    <link href="signup.css" rel="stylesheet">
   </head>
 
-  
+  <body>
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Pied Piper</a>
+    </nav>
 
-  <body class="text-center">
-    <form class="signinForm" id="signinForm">
-      <img id="centerImage" class="mb-4" src="niklas.jpg" alt="Niklas, our lord on saviour" width="200" height="250">
-      <h1 class="h3 mb-3 font-weight-normal">User registration</h1>
-      <span style="color:red;"><p id="errorMessage"></p></span>
-      <label for="inputUsername" class="sr-only">Username</label>
-      <input type="username" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
-      <label for="inputPassword" class="sr-only">Password</label>
-      <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-      <br>
-      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit">Register</button>
-    </form>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2">User registration</h1>
+          </div>
 
-    <video autoplay muted loop id="myVideo">
-      <source src="background.mp4" type="video/mp4">
-    </video>
+          <span style="color:red;"><h2 id ="errorMessage"></h2></span>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<!-- Blev fel av att använda "slim js" istället för vanliga
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
--->
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+          <form id="signupForm">
+            <h4>Username</h4>
+              <label for="inputUsername" class="sr-only">Username</label>
+              <input type="username" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
+              <h4>Password</h4>
+              <label for="inputPassword" class="sr-only">Password</label>
+              <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+              <br>
+              <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="producerCheck" id="producerCheck" checked>
+                  <h4>
+                    My house produces electricity
+                  </h4>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="batteryCheck" id="batteryCheck" checked>
+                    <h4>
+                      My house has a battery
+                    </h4>
+                  </div>
+
+                  <br>
+              <div class="form-group">
+                <h3>Battery capacity</h3>
+                <input type="number" class="form-control" id="batteryCapacity" placeholder="50 ounces" step="0.01" min="0" max="10000" required>
+                <small id="batteryCapacityHelp" class="form-text text-muted">Battery capacity is measured in gallons</small>
+              </div>
+
+              <h3>Send excess power</h3>
+              <p id="excessBatteryText">To battery: </p>
+              <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="excessBattery">
+              </div>
+              <br>
+              <p id="excessMarketText">To market: </p>
+              <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="excessMarket">
+              </div>
+        
+              <br>
+        
+              <h3>Get missing power</h3>
+              <p id="missingBatteryText">From battery: </p>
+              <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="missingBattery">
+              </div>
+              <br>
+              <p id="missingMarketText">From market: </p>
+              <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="missingMarket">
+              </div>
+              <br>
+              <button type="submit" class="btn btn-primary">Register</button>
+              <br><br>
+              <br><br>
+              
+            </form>
+        </main>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="../../assets/js/vendor/popper.min.js"></script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+    <script>
+      feather.replace()
+    </script>
+
+    <script>
+    $("#signupForm").submit(function(event) {
+        event.preventDefault();
+
+        var prosumer = {};
+
+        if (document.getElementById("producerCheck").checked == true){
+          prosumer.producer = true;
+        }
+        else{
+          prosumer.producer = false;
+        }
+
+        prosumer.username = document.getElementById("inputUsername").value;
+        prosumer.password = document.getElementById("inputPassword").value;
+        prosumer.batteryCapacity = document.getElementById("batteryCapacity").value;
+        prosumer.shareToMarket  = document.getElementById("excessMarket").value;
+        prosumer.marketSharePurchase = document.getElementById("missingMarket").value;
+
+        if (prosumer.batteryCapacity < 0){
+          console.log("NULL!!!!");
+        }
+
+        console.log(prosumer);
+        
+        $.ajax({
+          url: "http://localhost:3000/api/createUserAndProsumer/" + JSON.stringify(prosumer),
+          type: "POST",
+          contentType: "plain/text",
+          success: function(status){
+            if (status == "success"){
+              console.log("prosumer created successfully");
+              $('#errorMessage').text("User created successfully"); 
+              let url = "signin.html";
+              window.location = url;
+            }
+            else{
+              if (status == "usernameTaken"){
+                $('#errorMessage').text("Username already in use"); 
+              }
+              else if (status == "alreadyExists"){
+                $('#errorMessage').text("There is already a prosumer associated with your account"); 
+              }
+              else{
+                $('#errorMessage').text("There was an error creating your account"); 
+              }
+            }
+          },
+          error: function(status){
+            console.log("error: " + status);
+            $('#errorMessage').text("Problem logging in: " + status); 
+          }
+        });
+
+    });
+    
+    </script>
+
 <script>
-  $("#signinForm").submit(function(event) {
-    event.preventDefault();
+    var excessBatterySlider = document.getElementById("excessBattery");
+    var excessBatteryOutput = document.getElementById("excessBatteryText");
+    excessBatteryOutput.innerHTML = "To battery: " + excessBatterySlider.value + "%"; // Display the default slider value
 
-    let username = document.getElementById("inputUsername").value;  
-    let password = document.getElementById("inputPassword").value;  
-    let loginCredentialsJson = '{"username":"' + username + '", "password":"' + password + '"}';
+    var excessMarketSlider = document.getElementById("excessMarket");
+    var excessMarketOutput = document.getElementById("excessMarketText");
+    excessMarketOutput.innerHTML = "To market: " + excessMarketSlider.value + "%"; // Display the default slider value
 
-    $.ajax({
-    url: "http://localhost:3000/api/registerUser/" + loginCredentialsJson,
-    type: "POST",
-    contentType: "plain/text",
-    success: function(status){
-      if (status == "success"){
-        let url = "signin.html";
-        window.location = url;
-      }
-      else if (status == "usernameTaken"){
-        $('#errorMessage').text("Username already in use"); 
+    // Update the current slider value (each time you drag the slider handle)
+    excessBatterySlider.oninput = function() {
+      excessBatteryOutput.innerHTML = "To battery: " + this.value + "%";
+      var marketSliderValue = 100 - this.value;
+      excessMarketSlider.value = marketSliderValue;
+      excessMarketOutput.innerHTML = "To market: " + marketSliderValue + "%";
+    }
+
+    excessMarketSlider.oninput = function() {
+      excessMarketOutput.innerHTML = "To market: " + this.value + "%";
+      var batterySliderValue = 100 - this.value;
+      excessBatterySlider.value = batterySliderValue;
+      excessBatteryOutput.innerHTML = "To market: " + batterySliderValue + "%";
+    }
+
+    batteryCheck.oninput = function() {
+      if (document.getElementById("batteryCheck").checked == false){
+        batteryCapacity.value = 0;
+        document.getElementById("batteryCapacity").disabled = true;
       }
       else{
-        $('#errorMessage').text("Account could not be registered"); 
+        document.getElementById("batteryCapacity").disabled = false;
       }
-    },
-    error: function(status){
-      $('#errorMessage').text("Problem signing up: " + status); 
     }
-  });
+    </script>
 
+<script>
+    var missingBatterySlider = document.getElementById("missingBattery");
+    var missingBatteryOutput = document.getElementById("missingBatteryText");
+    missingBatteryOutput.innerHTML = "From battery: " + missingBatterySlider.value + "%"; // Display the default slider value
 
-  });
+    var missingMarketSlider = document.getElementById("missingMarket");
+    var missingMarketOutput = document.getElementById("missingMarketText");
+    missingMarketOutput.innerHTML = "From market: " + missingMarketSlider.value + "%"; // Display the default slider value
 
-  </script>
-</body>
+    // Update the current slider value (each time you drag the slider handle)
+    missingBatterySlider.oninput = function() {
+      missingBatteryOutput.innerHTML = "From battery: " + this.value + "%";
+      var marketSliderValue = 100 - this.value;
+      missingMarketSlider.value = marketSliderValue;
+      missingMarketOutput.innerHTML = "From market: " + marketSliderValue + "%";
+    }
+
+    missingMarketSlider.oninput = function() {
+      missingMarketOutput.innerHTML = "From market: " + this.value + "%";
+      var batterySliderValue = 100 - this.value;
+      missingBatterySlider.value = batterySliderValue;
+      missingBatteryOutput.innerHTML = "From market: " + batterySliderValue + "%";
+    }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
 </html>

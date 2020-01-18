@@ -4,10 +4,8 @@
 -Upload picture in houseSetup
 	-Show picture somewhere on dashboard
 -Add updateHouse page
--Add check in dashboard for if prosumer exists
 
 --Manager--
--Setup screen for creating initial powerplant like houseSetup
 -Screen to change values (almost like houseSetup)
 -When producing, control ratio sent to buffer/market (when stopped buffer supplies market demand)
 -See who is logged in

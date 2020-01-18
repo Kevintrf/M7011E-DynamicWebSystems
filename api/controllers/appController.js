@@ -211,3 +211,14 @@ exports.getProsumerById = function(req, res) {
     }
   });
 };
+
+exports.createUserAndProsumer = function(req, res) {
+  Task.createUserAndProsumer(req.params.query, function(err, result) {
+    if (err){
+      res.send(err);
+    }
+    else{
+      res.send(result);
+    }
+  });
+};
