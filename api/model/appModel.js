@@ -223,7 +223,7 @@ Task.login = function (input, req, result) {
                     else{
                         if (resultCompare == true){
                             req.session.userid = res[0].id;
-                            console.log("Correct password");
+                            //console.log("Correct password");
                             if (res[0].manager == "1"){
                                 result(null, "manager");
                             }
@@ -232,7 +232,7 @@ Task.login = function (input, req, result) {
                             }
                         }
                         else{
-                            console.log("Incorrect password");
+                            //console.log("Incorrect password");
                             result(null, "incorrect");
                             //Incorrect password!
                         }
@@ -314,7 +314,7 @@ Task.startPowerplant = function (req, result){
                                     else{
                                         if (res[0].powerplantStatus == "starting"){
                                             sql.query("UPDATE prosumers SET powerplantStatus='running' WHERE id = '" + id + "'", function (err, res) {  
-                                                console.log("Powerplant running");
+                                                //console.log("Powerplant running");
                                             });
                                         }
                                     }
@@ -373,7 +373,7 @@ Task.updateCredentials = function (input, req, result){
             else{
                 if (res[0].manager == 1){
                     let newCredentials = JSON.parse(input);
-                    console.log(newCredentials);
+                    //console.log(newCredentials);
                     if (newCredentials.username.length > 1 && newCredentials.password.length > 1){
                         //update both
                         sql.query("SELECT username FROM users WHERE username = '" + newCredentials.username + "'", function (err, res2) {
@@ -535,7 +535,7 @@ Task.getBlackoutUsers = function (input, req, result){
                         else{
                             var blackouts = [];
 
-                            console.log(res2.length);
+                            //console.log(res2.length);
 
                             for(var i = 0; i < res2.length; i++){
                                 if (i == 0){
@@ -675,7 +675,7 @@ Task.getAllProsumers = function (result) {
         }
 
         else{
-            console.log('tasks : ', res);  
+            //console.log('tasks : ', res);  
             result(null, res);
         }
     });   

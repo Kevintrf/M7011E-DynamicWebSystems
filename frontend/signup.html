@@ -51,7 +51,7 @@
                   <br>
               <div class="form-group">
                 <h3>Battery capacity</h3>
-                <input type="number" class="form-control" id="batteryCapacity" placeholder="50" step="0.01" min="0" max="10000" required>
+                <input type="number" class="form-control" id="batteryCapacity" placeholder="Battery capacity" step="0.01" min="0" max="10000" required>
                 <small id="batteryCapacityHelp" class="form-text text-muted">Battery capacity</small>
               </div>
 
@@ -150,7 +150,7 @@
           },
           error: function(status){
             console.log("error: " + status);
-            $('#errorMessage').text("Problem logging in: " + status); 
+            $('#errorMessage').text("There was a problem signing up. Please try again");
           }
         });
 

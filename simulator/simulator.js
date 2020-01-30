@@ -53,7 +53,7 @@ async function updateProsumersFromDatabase(){
             prosumerList.forEach(function(item, index) {
                 if (prosumerList[index].manager == 1){
                     if (market > 0){
-                        console.log("Adding excess market power to manager battery")
+                        //console.log("Adding excess market power to manager battery")
                         prosumerList[index].battery += market;
                         if (prosumerList[index].battery > prosumerList[index].batteryCapacity){
                             prosumerList[index].battery = prosumerList[index].batteryCapacity;
@@ -81,7 +81,7 @@ async function updateProsumersFromDatabase(){
 
 //https://stackoverflow.com/questions/4205181/insert-into-a-mysql-table-or-update-if-exists for INSERT INTO or UPDATE IF EXIST
 function updateDatabaseProsumerEntry(index, prosumerList, marketPrice, marketSupply, marketDemand){
-    console.log("updating database for user " + index);
+    //console.log("updating database for user " + index);
 
     //Kommer krasha om prosumern inte redan finns
     try{
@@ -93,7 +93,7 @@ function updateDatabaseProsumerEntry(index, prosumerList, marketPrice, marketSup
         ", date=" + Date.now() + 
         ", wind=" + prosumerList[index].wind +
         " WHERE id=" + prosumerList[index].id, function(data){
-            console.log("Database entry updated for user " + index);
+            //console.log("Database entry updated for user " + index);
         });
     }
 
@@ -106,14 +106,14 @@ function updateDatabaseProsumerEntry(index, prosumerList, marketPrice, marketSup
         if (marketPrice == null){
             db.sendToDatabase("UPDATE market SET demand =" + marketDemand + 
         ", supply=" + marketSupply, function(data){
-            console.log("Database entry updated for market " + index);
+            //console.log("Database entry updated for market " + index);
         });
         }
         else{
             db.sendToDatabase("UPDATE market SET demand =" + marketDemand + 
         ", supply=" + marketSupply + 
         ", modelPrice=" + marketPrice, function(data){
-            console.log("Database entry updated for market " + index);
+            //console.log("Database entry updated for market " + index);
         });
         }
     }
@@ -151,7 +151,7 @@ function currentWindSpeed(){
     if (output < 0)
         output = 0;
 
-    console.log("windspeed: " + output);
+    //console.log("windspeed: " + output);
     return output;
 }
 
@@ -174,9 +174,9 @@ function generatePower(index, prosumerList){
         prosumerList[index].production = production;
         prosumerList[index].consumption = consumption;
         prosumerList[index].power = power;
-        console.log("User " + index + " production has been set to " + production);
-        console.log("User " + index + " consumption has been set to " + consumption);
-        console.log("User " + index + " power has been set to " + power);
+        //console.log("User " + index + " production has been set to " + production);
+        //console.log("User " + index + " consumption has been set to " + consumption);
+        //console.log("User " + index + " power has been set to " + power);
     }
     else if (prosumerList[index].manager == 1){
         if (prosumerList[index].powerplantStatus == "running"){
@@ -189,9 +189,9 @@ function generatePower(index, prosumerList){
             prosumerList[index].production = production;
             prosumerList[index].consumption = consumption;
             prosumerList[index].power = power;
-            console.log("User " + index + " production has been set to " + production);
-            console.log("User " + index + " consumption has been set to " + consumption);
-            console.log("User " + index + " power has been set to " + power);
+            //console.log("User " + index + " production has been set to " + production);
+            //console.log("User " + index + " consumption has been set to " + consumption);
+            //console.log("User " + index + " power has been set to " + power);
         }
         else{
             let windspeed = 0;
@@ -203,10 +203,10 @@ function generatePower(index, prosumerList){
             prosumerList[index].production = production;
             prosumerList[index].consumption = consumption;
             prosumerList[index].power = power;
-            console.log("User " + index + " production has been set to " + production);
-            console.log("User " + index + " consumption has been set to " + consumption);
-            console.log("User " + index + " power has been set to " + power);
-            console.log("No power generated (powerplant not running)");
+            //console.log("User " + index + " production has been set to " + production);
+            //console.log("User " + index + " consumption has been set to " + consumption);
+            //console.log("User " + index + " power has been set to " + power);
+            //console.log("No power generated (powerplant not running)");
         }
     }
     else{
@@ -219,18 +219,18 @@ function generatePower(index, prosumerList){
         prosumerList[index].production = production;
         prosumerList[index].consumption = consumption;
         prosumerList[index].power = power;
-        console.log("User " + index + " production has been set to " + production);
-        console.log("User " + index + " consumption has been set to " + consumption);
-        console.log("User " + index + " power has been set to " + power);
-        console.log("No power generated (is not a producer)");
+        //console.log("User " + index + " production has been set to " + production);
+        //console.log("User " + index + " consumption has been set to " + consumption);
+        //console.log("User " + index + " power has been set to " + power);
+        //console.log("No power generated (is not a producer)");
     }
 }
 
 function handleExcessPower(index, prosumerList, manager){
     if (prosumerList[index].power > 0){
         if (prosumerList[index].marketBlockUntil < Date.now()){
-            console.log("user allowed to sell on market");
-            console.log("excess power for user " + index);
+            //console.log("user allowed to sell on market");
+            //console.log("excess power for user " + index);
             //Send to battery
 
             //Gör om i DB:n så det är shareToBattery så blir det lättare/snyggare i koden
@@ -241,7 +241,7 @@ function handleExcessPower(index, prosumerList, manager){
 
             if (battery >= batteryCapacity){
                 prosumerList[index].battery = batteryCapacity;
-                console.log("Battery of user " + index + " already full");
+                //console.log("Battery of user " + index + " already full");
             }
 
             else if (excessPowerBattery + battery >= batteryCapacity){
@@ -249,25 +249,25 @@ function handleExcessPower(index, prosumerList, manager){
 
                 excessPowerBattery = excessPowerBattery + battery - batteryCapacity;
                 
-                console.log("Battery of user " + index + " set to " + batteryCapacity);
+                //console.log("Battery of user " + index + " set to " + batteryCapacity);
             }
 
             else{
                 prosumerList[index].battery = excessPowerBattery + battery;
                 excessPowerBattery = 0;
-                console.log("Battery of user " + index + " set to " + (prosumerList[index].battery));
+                //console.log("Battery of user " + index + " set to " + (prosumerList[index].battery));
             }
 
             //Send to market
             excessPowerMarket = excessPowerMarket + excessPowerBattery;
             market += excessPowerMarket;
-            console.log("User " + index + " sent " + excessPowerMarket + " power to market");
+            //console.log("User " + index + " sent " + excessPowerMarket + " power to market");
 
             prosumerList[index].power = 0;
         }
 
         else{
-            console.log("User blocked from selling on market!");
+            //console.log("User blocked from selling on market!");
             prosumerList[index].battery += prosumerList[index].power;
             prosumerList[index].power = 0;
             if (prosumerList[index].battery > prosumerList[index].batteryCapacity){
@@ -286,7 +286,7 @@ function handleExcessPower(index, prosumerList, manager){
                 prosumerList[index].power += prosumerList[index].battery;
                 prosumerList[index].battery = 0;
             }
-            console.log("Manager used its battery to power itself");
+            //console.log("Manager used its battery to power itself");
         }
 
 
@@ -297,7 +297,7 @@ function handleExcessPower(index, prosumerList, manager){
 
 function handleMissingPower(index, prosumerList, manager){
     if (prosumerList[index].power < 0){
-        console.log("Missing power for user " + index);
+        //console.log("Missing power for user " + index);
 
         let percentageFromMarket = prosumerList[index].marketSharePurchase * 0.01;
         let percentageFromBattery = (1 - prosumerList[index].marketSharePurchase * 0.01);
@@ -322,7 +322,7 @@ function handleMissingPower(index, prosumerList, manager){
     }
 
     else{
-        console.log("No missing power for user " + index);
+        //console.log("No missing power for user " + index);
     }
 }
 
@@ -334,7 +334,7 @@ function getPowerFromBattery(missingPowerBattery, index, prosumerList){
             let newPower = prosumerList[index].power + missingPowerBattery;
             prosumerList[index].battery = newBattery;
             prosumerList[index].power = newPower;
-            console.log("User " + index + " took " + missingPowerBattery + " power from battery");
+            //console.log("User " + index + " took " + missingPowerBattery + " power from battery");
             return false;
         }
 
@@ -342,7 +342,7 @@ function getPowerFromBattery(missingPowerBattery, index, prosumerList){
             let newPower = prosumerList[index].power + battery;
             prosumerList[index].battery = 0;
             prosumerList[index].power = newPower;
-            console.log("User " + index + " took " + battery + " power from battery (not enough to fulfill user demand)");
+            //console.log("User " + index + " took " + battery + " power from battery (not enough to fulfill user demand)");
             return true;
         }
     }
@@ -362,7 +362,7 @@ function getPowerFromMarket(missingPowerMarket, index, prosumerList){
             let newPower = prosumerList[index].power + missingPowerMarket;
             market = newMarket;
             prosumerList[index].power = newPower;
-            console.log("User " + index + " bought " + missingPowerMarket + " power from market");
+            //console.log("User " + index + " bought " + missingPowerMarket + " power from market");
             return false;
         }
 
@@ -370,13 +370,13 @@ function getPowerFromMarket(missingPowerMarket, index, prosumerList){
             let newPower = prosumerList[index].power + availablePower;
             market = 0;
             prosumerList[index].power = newPower;
-            console.log("User " + index + " took " + availablePower + " power from market (not enough to fulfill user demand)");
+            //console.log("User " + index + " took " + availablePower + " power from market (not enough to fulfill user demand)");
             return true;
         }
     }
 
     else{
-        console.log("User " + index + " tried to buy power but market was empty");
+        //console.log("User " + index + " tried to buy power but market was empty");
         return true;
     }
 }
@@ -386,13 +386,13 @@ function checkBlackout(index, prosumerList){
     let blackout = prosumerList[index].blackout;
     if (power < 0){
         prosumerList[index].blackout = 1;
-        console.log("User " + index + " has experienced a blackout, currentpower: " + power);
+        //console.log("User " + index + " has experienced a blackout, currentpower: " + power);
     }
     else if (blackout == 1){
         prosumerList[index].blackout = 0;
-        console.log("Blackout status removed from user " + index);
+        //console.log("Blackout status removed from user " + index);
     }
     else{
-        console.log("no blackout for user " + index);
+        //console.log("no blackout for user " + index);
     }
 }
