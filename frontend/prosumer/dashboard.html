@@ -26,7 +26,7 @@
 
     <div class="container-fluid">
       <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <nav class="col-md-2 d-none d-md-block bg-light">
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
@@ -49,6 +49,8 @@
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
             <h1 class="h2">Dashboard</h1>
           </div>
+          <h2>House</h2>
+          <img id="photo" src="" height="150">
 
           <h2>Prosumer stats</h2>
           <div class="table-responsive">
@@ -128,6 +130,19 @@
             }
             var d = new Date(prosumer[0].date);
             $('#date').text(d.getHours() + ":"+ d.getMinutes() + ":" + d.getSeconds() + " " + d.toDateString());
+
+            $.ajax({
+              url: "../../uploads/" + prosumer[0].id + ".jpg",
+              type: "HEAD",
+              error: function()
+              {
+                $("#photo").attr("src", "../../uploads/" + "default" + ".jpg");
+              },
+              success: function()
+              {
+                $("#photo").attr("src", "../../uploads/" + prosumer[0].id + ".jpg");
+              }
+            });
 
           }
         }

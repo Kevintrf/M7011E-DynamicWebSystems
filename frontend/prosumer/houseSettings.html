@@ -26,7 +26,7 @@
 
     <div class="container-fluid">
       <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <nav class="col-md-2 d-none d-md-block bg-light">
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
@@ -108,6 +108,17 @@
               <br><br>
               
             </form>
+
+            <h3>Upload photo</h3>
+            <p>Must be a jpeg file</p>
+            <form id="uploadphoto">
+              <input id="uploadinput" type="file" accept="image/jpeg" name="photo" >
+              <input type="submit" value="Upload">
+            </form>
+            <!-- <form id="uploadphoto" action="http://localhost:3000/api/uploadPhoto/" method="post" enctype="multipart/form-data">
+              <input type="file" accept="image/jpeg" name="photo" >
+              <input type="submit" value="Upload">
+            </form> -->
         </main>
       </div>
     </div>
@@ -125,6 +136,30 @@
     </script>
 
     <script>
+    $("#uploadphoto").submit(function(event) {
+      event.preventDefault();
+
+      $.ajax({
+          url: "http://localhost:3000/api/uploadPhoto/",
+          type: "POST",
+          data:  new FormData(this),
+          contentType: false,
+          cache: false,
+          processData:false,
+          success: function(status){
+            if (status == "success"){
+              $('#errorMessage').text("Photo uploaded"); 
+            }
+            else{
+              $('#errorMessage').text("There was a problem uploading the photo"); 
+            }
+          },
+          error: function(status){
+            $('#errorMessage').text("There was a problem uploading the photo"); 
+          }
+        });
+    });
+
     $("#houseSetupForm").submit(function(event) {
         event.preventDefault();
 

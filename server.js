@@ -2,6 +2,30 @@ const express = require('express'),
   app = express(),
   bodyParser = require('body-parser');
   port = process.env.PORT || 3000;
+
+const multer = require('multer');
+//const upload = multer({dest: __dirname + '/uploads'});
+
+
+// var storage = multer.diskStorage(
+//   {
+//       destination: __dirname + '/uploads',
+//       filename: function (req, file, cb ) {
+//         cb(null, Date.now() + '-' + file.originalname );
+//       }
+//   }
+// );
+
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+      cb(null, './uploads/');
+  },
+  filename: function(req, file, cb) {
+      cb(null, req.session.userid + ".jpg");
+  }
+});
+
+var upload = multer({storage: storage});
   
 const session = require('express-session')
 //let secret = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
@@ -28,6 +52,18 @@ mc.connect();
 app.listen(port);
 
 console.log('API server started on port ' + port);
+
+app.post('/api/uploadPhoto', upload.single('photo'), (req, res) => {
+	try{
+		res.send("success");
+	}
+	catch(err){
+		res.send(400);
+	}
+});
+
+
+//app.use(multer({dest:'./uploads/'}));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
