@@ -41,5 +41,3 @@ chromium --disable-web-security --allow-file-access-from-files --user-data-dir=~
 Open /frontend/signin.html in web browser
 
 A user can only become a manager by manually flagging them as such in the database, the database comes with a default manager with the username "manager" and password "manager" without quotes.
-
-An online version of the system can be accessed here http://172.105.77.21/
